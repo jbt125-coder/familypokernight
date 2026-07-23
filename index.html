@@ -744,7 +744,6 @@ display: none;
       <div class="title">POKER NIGHT</div>
       <div class="subtitle">choose your game</div>
 
-```
   <div class="card-panel">
     <button class="bigBtn" onclick="Nav.go('tourneySetupScreen')">No-Limit Hold'em Tournament</button>
     <button class="bigBtn secondary" onclick="Nav.go('dealerChoiceSetupScreen')">Family Poker Night (Dealer's Choice)</button>
@@ -752,7 +751,6 @@ display: none;
 
   <div class="smallNote" style="text-align:center;">Single-file build &middot; optimized for iPhone portrait</div>
 </div>
-```
 
   </div>
 
@@ -763,7 +761,6 @@ display: none;
       <div class="backBtn" onclick="Nav.go('mainMenuScreen')">&larr; Back</div>
       <div class="title" style="font-size:22px;">Tournament Setup</div>
 
-```
   <div class="card-panel">
     <div class="panel-label">Number of Bots</div>
     <div class="row">
@@ -794,7 +791,6 @@ display: none;
 
   <button class="bigBtn" onclick="Setup.startTournament()">Deal Me In</button>
 </div>
-```
 
   </div>
 
@@ -805,7 +801,6 @@ display: none;
       <div class="backBtn" onclick="Nav.go('mainMenuScreen')">&larr; Back</div>
       <div class="title" style="font-size:22px;">Family Poker Night</div>
 
-```
   <div class="card-panel">
     <div class="panel-label">Number of Bots</div>
     <div class="row">
@@ -850,7 +845,6 @@ display: none;
 
   <button class="bigBtn" onclick="Setup.startDealerChoice()">Start Poker Night</button>
 </div>
-```
 
   </div>
 
@@ -870,7 +864,6 @@ display: none;
       <div id="handArea"></div>
       <div id="myStatsBar"></div>
 
-```
   <div id="drawOverlay">
     <div id="drawMsg">Tap cards to discard, then draw</div>
     <div class="actionRow">
@@ -905,7 +898,6 @@ display: none;
 
   <div class="toast" id="toast"></div>
 </div>
-```
 
   </div>
 
@@ -925,21 +917,21 @@ var Nav = {
 };
 
 function toast(msg, ms) {
-var t = document.getElementById(‘toast’);
+var t = document.getElementById('toast');
 t.innerHTML = msg;
-t.style.display = ‘block’;
+t.style.display = 'block';
 clearTimeout(toast._h);
-toast._h = setTimeout(function() { t.style.display = ‘none’; }, ms || 1400);
+toast._h = setTimeout(function() { t.style.display = 'none'; }, ms || 1400);
 }
 
 // ============================================================
 // CARD / DECK ENGINE
 // ============================================================
-var SUITS = [‘s’, ‘h’, ‘d’, ‘c’];
-var SUIT_SYM = { s: ‘\u2660’, h: ‘\u2665’, d: ‘\u2666’, c: ‘\u2663’ };
+var SUITS = ['s', 'h', 'd', 'c'];
+var SUIT_SYM = { s: '\u2660', h: '\u2665', d: '\u2666', c: '\u2663' };
 var SUIT_RED = { h: true, d: true };
-var RANKS = [‘2’,‘3’,‘4’,‘5’,‘6’,‘7’,‘8’,‘9’,‘T’,‘J’,‘Q’,‘K’,‘A’];
-var RANK_VAL = { ‘2’:2,‘3’:3,‘4’:4,‘5’:5,‘6’:6,‘7’:7,‘8’:8,‘9’:9,‘T’:10,‘J’:11,‘Q’:12,‘K’:13,‘A’:14 };
+var RANKS = ['2','3','4','5','6','7','8','9','T','J','Q','K','A'];
+var RANK_VAL = { '2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'T':10,'J':11,'Q':12,'K':13,'A':14 };
 
 function makeCard(rank, suit) {
 return { rank: rank, suit: suit, val: RANK_VAL[rank] };
@@ -956,7 +948,7 @@ return d;
 }
 
 function shuffle(deck) {
-for (var i = deck.length - 1; i > 0; i–) {
+for (var i = deck.length - 1; i > 0; i--) {
 var j = Math.floor(Math.random() * (i + 1));
 var tmp = deck[i];
 deck[i] = deck[j];
@@ -966,18 +958,18 @@ return deck;
 }
 
 function cardHtml(card) {
-if (!card) return ‘’;
+if (!card) return '';
 if (card.hidden) {
-return ‘<div class="playingCard back"></div>’;
+return '<div class="playingCard back"></div>';
 }
-var cls = SUIT_RED[card.suit] ? ‘cardRed’ : ‘cardBlack’;
-return ‘<div class="playingCard ' + cls + '"><div class="rk">’ + card.rank + ‘</div><div class="st">’ + SUIT_SYM[card.suit] + ‘</div></div>’;
+var cls = SUIT_RED[card.suit] ? 'cardRed' : 'cardBlack';
+return '<div class="playingCard ' + cls + '"><div class="rk">' + card.rank + '</div><div class="st">' + SUIT_SYM[card.suit] + '</div></div>';
 }
 
 function miniCardHtml(card) {
-if (!card || card.hidden) return ‘<div class="miniCard"></div>’;
-var cls = SUIT_RED[card.suit] ? ‘cardRed’ : ‘cardBlack’;
-return ‘<div class="miniCard faceup ' + cls + '">’ + card.rank + ‘</div>’;
+if (!card || card.hidden) return '<div class="miniCard"></div>';
+var cls = SUIT_RED[card.suit] ? 'cardRed' : 'cardBlack';
+return '<div class="miniCard faceup ' + cls + '">' + card.rank + '</div>';
 }
 
 // ============================================================
@@ -1043,30 +1035,30 @@ var tiebreak = [];
 for (i = 0; i < groups.length; i++) tiebreak.push(groups[i].val);
 
 if (isStraight && isFlush) {
-return { rank: 8, tiebreak: [straightHigh], name: (straightHigh === 14 ? ‘Royal Flush’ : straightHigh + ‘-high Straight Flush’) };
+return { rank: 8, tiebreak: [straightHigh], name: (straightHigh === 14 ? 'Royal Flush' : straightHigh + '-high Straight Flush') };
 }
 if (groups[0].count === 4) {
-return { rank: 7, tiebreak: tiebreak, name: ‘Four of a Kind’ };
+return { rank: 7, tiebreak: tiebreak, name: 'Four of a Kind' };
 }
 if (groups[0].count === 3 && groups[1] && groups[1].count === 2) {
-return { rank: 6, tiebreak: tiebreak, name: ‘Full House’ };
+return { rank: 6, tiebreak: tiebreak, name: 'Full House' };
 }
 if (isFlush) {
-return { rank: 5, tiebreak: vals, name: ‘Flush’ };
+return { rank: 5, tiebreak: vals, name: 'Flush' };
 }
 if (isStraight) {
-return { rank: 4, tiebreak: [straightHigh], name: straightHigh + ‘-high Straight’ };
+return { rank: 4, tiebreak: [straightHigh], name: straightHigh + '-high Straight' };
 }
 if (groups[0].count === 3) {
-return { rank: 3, tiebreak: tiebreak, name: ‘Three of a Kind’ };
+return { rank: 3, tiebreak: tiebreak, name: 'Three of a Kind' };
 }
 if (groups[0].count === 2 && groups[1] && groups[1].count === 2) {
-return { rank: 2, tiebreak: tiebreak, name: ‘Two Pair’ };
+return { rank: 2, tiebreak: tiebreak, name: 'Two Pair' };
 }
 if (groups[0].count === 2) {
-return { rank: 1, tiebreak: tiebreak, name: ‘Pair’ };
+return { rank: 1, tiebreak: tiebreak, name: 'Pair' };
 }
-return { rank: 0, tiebreak: vals, name: vals[0] + ‘-high’ };
+return { rank: 0, tiebreak: vals, name: vals[0] + '-high' };
 }
 
 function compareEval(a, b) {
@@ -1157,13 +1149,13 @@ return best;
 }
 
 function lowHandName(ev) {
-if (!ev) return ‘’;
-var names = { 1: ‘A’, 2: ‘2’, 3: ‘3’, 4: ‘4’, 5: ‘5’, 6: ‘6’, 7: ‘7’, 8: ‘8’, 9: ‘9’, 10: ‘T’ };
+if (!ev) return '';
+var names = { 1: 'A', 2: '2', 3: '3', 4: '4', 5: '5', 6: '6', 7: '7', 8: '8', 9: '9', 10: 'T' };
 var sorted = ev.tiebreak.slice();
 sorted.sort(function(a, b) { return a - b; });
 var parts = [];
 for (var i = 0; i < sorted.length; i++) parts.push(names[sorted[i]] || sorted[i]);
-return parts.join(’-’) + ’ low’;
+return parts.join('-') + ' low';
 }
 
 // Converts a bestLowHand() result (ace-to-five, lower is better) into a compareEval()-compatible
@@ -1172,7 +1164,7 @@ return parts.join(’-’) + ’ low’;
 // A missing low (no 5 distinct cards, extremely rare with 7 cards) is treated as the worst possible hand.
 function lowEvToComparable(lowEv) {
 if (!lowEv) {
-return { rank: -1, tiebreak: [0, 0, 0, 0, 0], name: ‘No Low Hand’ };
+return { rank: -1, tiebreak: [0, 0, 0, 0, 0], name: 'No Low Hand' };
 }
 var inverted = [];
 for (var i = 0; i < lowEv.tiebreak.length; i++) {
@@ -1183,247 +1175,247 @@ return { rank: 0, tiebreak: inverted, name: lowHandName(lowEv) };
 
 // ============================================================
 // GAME DEFINITIONS (rules text + metadata) - Phase 1 implemented games
-// Phase 2 (not yet playable, shown grayed in Dealer’s Choice list): rest of the ~50 variant list
+// Phase 2 (not yet playable, shown grayed in Dealer's Choice list): rest of the ~50 variant list
 // ============================================================
 var GAME_DEFS = {
 holdem: {
-name: “Texas Hold’em”,
-tag: ‘Community Card’,
+name: "Texas Hold'em",
+tag: 'Community Card',
 implemented: true,
 rulesHtml: function() {
-return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
-‘<li>Each player gets 2 hole cards, face down.</li>’ +
-‘<li>5 community cards are dealt face up in stages: Flop (3), Turn (1), River (1), with betting after each.</li>’ +
-‘<li>Best 5-card hand using any combo of your 2 cards + the 5 community cards wins.</li>’ +
-‘</ul></div>’ + rankListHtml();
+return '<div class="rSection"><div class="rHead">How it plays</div><ul>' +
+'<li>Each player gets 2 hole cards, face down.</li>' +
+'<li>5 community cards are dealt face up in stages: Flop (3), Turn (1), River (1), with betting after each.</li>' +
+'<li>Best 5-card hand using any combo of your 2 cards + the 5 community cards wins.</li>' +
+'</ul></div>' + rankListHtml();
 }
 },
 drawfive: {
-name: ‘Five-Card Draw’,
-tag: ‘Draw’,
+name: 'Five-Card Draw',
+tag: 'Draw',
 implemented: true,
 rulesHtml: function() {
-return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
-‘<li>Each player gets 5 cards, face down. A round of betting follows.</li>’ +
-‘<li>Each player may then discard 0-5 cards and draw replacements from the deck.</li>’ +
-‘<li>A final round of betting, then showdown. Best 5-card hand wins.</li>’ +
-‘</ul></div>’ + rankListHtml();
+return '<div class="rSection"><div class="rHead">How it plays</div><ul>' +
+'<li>Each player gets 5 cards, face down. A round of betting follows.</li>' +
+'<li>Each player may then discard 0-5 cards and draw replacements from the deck.</li>' +
+'<li>A final round of betting, then showdown. Best 5-card hand wins.</li>' +
+'</ul></div>' + rankListHtml();
 }
 },
 stud7: {
-name: ‘Seven-Card Stud’,
-tag: ‘Stud’,
+name: 'Seven-Card Stud',
+tag: 'Stud',
 implemented: true,
 rulesHtml: function() {
-return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
-‘<li>Each player gets 2 cards down, 1 up (3rd St), then 4 more streets of 1 card each: up, up, up, then a final card down (7th St).</li>’ +
-‘<li>Betting after every card. Lowest up-card usually acts first on 3rd Street (“bring-in”).</li>’ +
-‘<li>Best 5-card hand from your 7 cards wins at showdown.</li>’ +
-‘</ul></div>’ + rankListHtml();
+return '<div class="rSection"><div class="rHead">How it plays</div><ul>' +
+'<li>Each player gets 2 cards down, 1 up (3rd St), then 4 more streets of 1 card each: up, up, up, then a final card down (7th St).</li>' +
+'<li>Betting after every card. Lowest up-card usually acts first on 3rd Street ("bring-in").</li>' +
+'<li>Best 5-card hand from your 7 cards wins at showdown.</li>' +
+'</ul></div>' + rankListHtml();
 }
 },
 ftq: {
-name: ‘Follow the Queen’,
-tag: ‘Stud / Wild’,
+name: 'Follow the Queen',
+tag: 'Stud / Wild',
 implemented: true,
 rulesHtml: function() {
-return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
-‘<li>Played like Seven-Card Stud, dealt the same way.</li>’ +
-‘<li>Whenever a Queen is dealt face-up, the very next card dealt face-up (to anyone) becomes wild for everyone, for that hand.</li>’ +
-‘<li>If another Queen appears later, the wild card designation follows to the newest “next card” instead.</li>’ +
-‘<li>All four Queens are always wild themselves, in addition to whatever card follows a Queen.</li>’ +
-‘</ul></div>’ + rankListHtml();
+return '<div class="rSection"><div class="rHead">How it plays</div><ul>' +
+'<li>Played like Seven-Card Stud, dealt the same way.</li>' +
+'<li>Whenever a Queen is dealt face-up, the very next card dealt face-up (to anyone) becomes wild for everyone, for that hand.</li>' +
+'<li>If another Queen appears later, the wild card designation follows to the newest "next card" instead.</li>' +
+'<li>All four Queens are always wild themselves, in addition to whatever card follows a Queen.</li>' +
+'</ul></div>' + rankListHtml();
 }
 },
 
 omaha: {
-name: ‘Omaha’,
-tag: ‘Community Card’,
+name: 'Omaha',
+tag: 'Community Card',
 implemented: true,
 rulesHtml: function() {
-return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
-‘<li>Each player gets 4 hole cards, face down.</li>’ +
-‘<li>5 community cards are dealt in stages: Flop (3), Turn (1), River (1), with betting after each.</li>’ +
-‘<li>You must use exactly 2 of your hole cards and exactly 3 community cards to make your best 5-card hand.</li>’ +
-‘</ul></div>’ + rankListHtml();
+return '<div class="rSection"><div class="rHead">How it plays</div><ul>' +
+'<li>Each player gets 4 hole cards, face down.</li>' +
+'<li>5 community cards are dealt in stages: Flop (3), Turn (1), River (1), with betting after each.</li>' +
+'<li>You must use exactly 2 of your hole cards and exactly 3 community cards to make your best 5-card hand.</li>' +
+'</ul></div>' + rankListHtml();
 }
 },
 omahahilo: {
-name: ‘Omaha Hi-Lo (Eight or Better)’,
-tag: ‘Community / Split Pot’,
+name: 'Omaha Hi-Lo (Eight or Better)',
+tag: 'Community / Split Pot',
 implemented: true,
 rulesHtml: function() {
-return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
-‘<li>Played like Omaha: 4 hole cards, 5 community cards, must use exactly 2+3.</li>’ +
-‘<li>The pot splits between the best high hand and the best qualifying low hand (8-high or better, no pairs).</li>’ +
-‘<li>If no hand qualifies for low, the best high hand takes the whole pot.</li>’ +
-‘<li>A player can use different card combinations for their high and low hands.</li>’ +
-‘</ul></div>’ + rankListHtml();
+return '<div class="rSection"><div class="rHead">How it plays</div><ul>' +
+'<li>Played like Omaha: 4 hole cards, 5 community cards, must use exactly 2+3.</li>' +
+'<li>The pot splits between the best high hand and the best qualifying low hand (8-high or better, no pairs).</li>' +
+'<li>If no hand qualifies for low, the best high hand takes the whole pot.</li>' +
+'<li>A player can use different card combinations for their high and low hands.</li>' +
+'</ul></div>' + rankListHtml();
 }
 },
 razz: {
-name: ‘Razz’,
-tag: ‘Stud / Lowball’,
+name: 'Razz',
+tag: 'Stud / Lowball',
 implemented: true,
 rulesHtml: function() {
-return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
-‘<li>Dealt exactly like Seven-Card Stud: 2 down, 1 up, then 4 more streets.</li>’ +
-‘<li>Lowest hand wins — Aces are low, straights and flushes don't count against you.</li>’ +
-‘<li>The best possible hand is A-2-3-4-5 (the “wheel”).</li>’ +
-‘<li>Highest up-card brings in the betting on 3rd Street (opposite of regular stud).</li>’ +
-‘</ul></div><div class="rSection"><div class="rHead">Low Hand Ranking (best to worst)</div>’ +
-‘<div class="rankLine">A-2-3-4-5 > A-2-3-4-6 > … > 2-3-4-5-7 > … down to 10-J-Q-K-A high</div></div>’;
+return '<div class="rSection"><div class="rHead">How it plays</div><ul>' +
+'<li>Dealt exactly like Seven-Card Stud: 2 down, 1 up, then 4 more streets.</li>' +
+`<li>Lowest hand wins — Aces are low, straights and flushes don't count against you.</li>` +
+'<li>The best possible hand is A-2-3-4-5 (the "wheel").</li>' +
+'<li>Highest up-card brings in the betting on 3rd Street (opposite of regular stud).</li>' +
+'</ul></div><div class="rSection"><div class="rHead">Low Hand Ranking (best to worst)</div>' +
+'<div class="rankLine">A-2-3-4-5 > A-2-3-4-6 > … > 2-3-4-5-7 > … down to 10-J-Q-K-A high</div></div>';
 }
 },
 anaconda: {
-name: ‘Anaconda (Pass the Trash)’,
-tag: ‘Draw / Pass’,
+name: 'Anaconda (Pass the Trash)',
+tag: 'Draw / Pass',
 implemented: true,
 rulesHtml: function() {
-return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
-‘<li>Each player is dealt 7 cards, face down. No betting yet.</li>’ +
-‘<li>Everyone chooses 3 cards and passes them to the player on their left, all at once.</li>’ +
-‘<li>After receiving 3 cards, everyone again passes 2 cards to the left, then finally 1 card to the left.</li>’ +
-‘<li>Each player now has 7 cards and picks their best 5 to keep. A round of betting follows, then showdown.</li>’ +
-‘</ul></div>’ + rankListHtml();
+return '<div class="rSection"><div class="rHead">How it plays</div><ul>' +
+'<li>Each player is dealt 7 cards, face down. No betting yet.</li>' +
+'<li>Everyone chooses 3 cards and passes them to the player on their left, all at once.</li>' +
+'<li>After receiving 3 cards, everyone again passes 2 cards to the left, then finally 1 card to the left.</li>' +
+'<li>Each player now has 7 cards and picks their best 5 to keep. A round of betting follows, then showdown.</li>' +
+'</ul></div>' + rankListHtml();
 }
 },
 guts: {
-name: ‘Guts’,
-tag: ‘Multi-Pot’,
+name: 'Guts',
+tag: 'Multi-Pot',
 implemented: true,
 rulesHtml: function() {
-return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
-‘<li>Everyone is dealt 3 cards face down. After looking, each player secretly decides IN or OUT.</li>’ +
-‘<li>Everyone reveals their choice at once. Players who chose OUT contribute nothing and fold.</li>’ +
-‘<li>Among players who chose IN, the best 3-card hand wins the pot. Every other IN player who wasn't the winner must match the pot into the next round!</li>’ +
-‘<li>If nobody chooses IN, or only one player does, the pot carries over and grows for the next hand.</li>’ +
-‘<li>This repeats — pots can grow large fast, so choose IN carefully.</li>’ +
-‘</ul></div>’ + rankListHtml();
+return '<div class="rSection"><div class="rHead">How it plays</div><ul>' +
+'<li>Everyone is dealt 3 cards face down. After looking, each player secretly decides IN or OUT.</li>' +
+'<li>Everyone reveals their choice at once. Players who chose OUT contribute nothing and fold.</li>' +
+`<li>Among players who chose IN, the best 3-card hand wins the pot. Every other IN player who wasn't the winner must match the pot into the next round!</li>` +
+'<li>If nobody chooses IN, or only one player does, the pot carries over and grows for the next hand.</li>' +
+'<li>This repeats — pots can grow large fast, so choose IN carefully.</li>' +
+'</ul></div>' + rankListHtml();
 }
 },
 indian: {
-name: “Indian Poker (Blind Man’s Bluff)”,
-tag: ‘Novelty’,
+name: "Indian Poker (Blind Man's Bluff)",
+tag: 'Novelty',
 implemented: true,
 rulesHtml: function() {
-return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
-‘<li>Each player gets exactly 1 card, but holds it facing outward — you see everyone else's card, but not your own.</li>’ +
-‘<li>Betting proceeds based on reading opponents' reactions and card values, since you must judge your own card blind.</li>’ +
-‘<li>At showdown, cards are flipped around: highest single card wins.</li>’ +
-‘</ul></div><div class="rSection"><div class="rHead">Card Ranking (best to worst)</div>’ +
-‘<div class="rankLine">A > K > Q > J > 10 > 9 > 8 > 7 > 6 > 5 > 4 > 3 > 2</div></div>’
+return '<div class="rSection"><div class="rHead">How it plays</div><ul>' +
+`<li>Each player gets exactly 1 card, but holds it facing outward — you see everyone else's card, but not your own.</li>` +
+`<li>Betting proceeds based on reading opponents' reactions and card values, since you must judge your own card blind.</li>` +
+'<li>At showdown, cards are flipped around: highest single card wins.</li>' +
+'</ul></div><div class="rSection"><div class="rHead">Card Ranking (best to worst)</div>' +
+'<div class="rankLine">A > K > Q > J > 10 > 9 > 8 > 7 > 6 > 5 > 4 > 3 > 2</div></div>'
 }
 },
 screwneighbor: {
-name: ‘Screw Your Neighbor’,
-tag: ‘Novelty’,
+name: 'Screw Your Neighbor',
+tag: 'Novelty',
 implemented: true,
 rulesHtml: function() {
-return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
-‘<li>Each player gets exactly 1 card, face down, and may look at their own card once.</li>’ +
-‘<li>On your turn, you may swap your card with the next player's (they can't refuse), or knock to keep yours.</li>’ +
-‘<li>After everyone has had a turn, all cards are revealed — lowest card loses a chip (or is eliminated in some house rules).</li>’ +
-‘<li>Kings can often not be swapped away in some house rules — this table always allows swaps for simplicity.</li>’ +
-‘</ul></div><div class="rSection"><div class="rHead">Card Ranking (best to worst)</div>’ +
-‘<div class="rankLine">A > K > Q > J > 10 > 9 > 8 > 7 > 6 > 5 > 4 > 3 > 2</div></div>’
+return '<div class="rSection"><div class="rHead">How it plays</div><ul>' +
+'<li>Each player gets exactly 1 card, face down, and may look at their own card once.</li>' +
+`<li>On your turn, you may swap your card with the next player's (they can't refuse), or knock to keep yours.</li>` +
+'<li>After everyone has had a turn, all cards are revealed — lowest card loses a chip (or is eliminated in some house rules).</li>' +
+'<li>Kings can often not be swapped away in some house rules — this table always allows swaps for simplicity.</li>' +
+'</ul></div><div class="rSection"><div class="rHead">Card Ranking (best to worst)</div>' +
+'<div class="rankLine">A > K > Q > J > 10 > 9 > 8 > 7 > 6 > 5 > 4 > 3 > 2</div></div>'
 }
 },
 chicago: {
-name: ‘Chicago (High Chicago)’,
-tag: ‘Stud / Split Pot’,
+name: 'Chicago (High Chicago)',
+tag: 'Stud / Split Pot',
 implemented: true,
 rulesHtml: function() {
-return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
-‘<li>Dealt exactly like Seven-Card Stud.</li>’ +
-‘<li>At showdown, the pot splits in half: one half to the best 5-card poker hand, the other half to whoever has the highest spade in the hole.</li>’ +
-‘<li>It's possible (and great) to scoop the whole pot by winning both halves.</li>’ +
-‘</ul></div>’ + rankListHtml();
+return '<div class="rSection"><div class="rHead">How it plays</div><ul>' +
+'<li>Dealt exactly like Seven-Card Stud.</li>' +
+'<li>At showdown, the pot splits in half: one half to the best 5-card poker hand, the other half to whoever has the highest spade in the hole.</li>' +
+`<li>It's possible (and great) to scoop the whole pot by winning both halves.</li>` +
+'</ul></div>' + rankListHtml();
 }
 },
 baseball: {
-name: ‘Baseball’,
-tag: ‘Stud / Wild’,
+name: 'Baseball',
+tag: 'Stud / Wild',
 implemented: true,
 rulesHtml: function() {
-return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
-‘<li>Dealt like Seven-Card Stud. All 3's dealt are wild, for everyone, all game.</li>’ +
-‘<li>Whenever a 4 is dealt face up, that player may pay double the current bet to “buy” an extra replacement card face down.</li>’ +
-‘<li>If a 9 is dealt face up to anyone, betting immediately doubles for that round.</li>’ +
-‘<li>Best 5-card hand (with wild 3's) wins at showdown.</li>’ +
-‘</ul></div>’ + rankListHtml();
+return '<div class="rSection"><div class="rHead">How it plays</div><ul>' +
+`<li>Dealt like Seven-Card Stud. All 3's dealt are wild, for everyone, all game.</li>` +
+'<li>Whenever a 4 is dealt face up, that player may pay double the current bet to "buy" an extra replacement card face down.</li>' +
+'<li>If a 9 is dealt face up to anyone, betting immediately doubles for that round.</li>' +
+`<li>Best 5-card hand (with wild 3's) wins at showdown.</li>` +
+'</ul></div>' + rankListHtml();
 }
 },
 stud5: {
-name: ‘Five-Card Stud’,
-tag: ‘Stud’,
+name: 'Five-Card Stud',
+tag: 'Stud',
 implemented: true,
 rulesHtml: function() {
-return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
-‘<li>Each player gets 1 card down, 1 up, then 3 more streets of 1 card each, all face up.</li>’ +
-‘<li>Betting after every card. Lowest up-card acts first on the first street (“bring-in”).</li>’ +
-‘<li>Best 5-card hand from your cards wins at showdown — there's no draw, so every card matters.</li>’ +
-‘</ul></div>’ + rankListHtml();
+return '<div class="rSection"><div class="rHead">How it plays</div><ul>' +
+'<li>Each player gets 1 card down, 1 up, then 3 more streets of 1 card each, all face up.</li>' +
+'<li>Betting after every card. Lowest up-card acts first on the first street ("bring-in").</li>' +
+`<li>Best 5-card hand from your cards wins at showdown — there's no draw, so every card matters.</li>` +
+'</ul></div>' + rankListHtml();
 }
 },
 // –– Phase 3 placeholders (data present, not yet implemented as playable games) ––
-triple27: { name: ‘2-7 Triple Draw’, tag: ‘Draw / Lowball’, implemented: false },
-lowchicago: { name: ‘Low Chicago’, tag: ‘Stud / Split Pot’, implemented: false },
-nightbaseball: { name: ‘Night Baseball’, tag: ‘Stud / Wild’, implemented: false },
-kingslittle: { name: ‘Kings and Little Ones’, tag: ‘Stud / Wild’, implemented: false },
-draw6: { name: ‘Six-Card Draw’, tag: ‘Draw’, implemented: false },
-mississippi: { name: ‘Mississippi Stud’, tag: ‘Stud’, implemented: false },
-courchevel: { name: ‘Courchevel’, tag: ‘Community Card’, implemented: false },
-irish: { name: ‘Irish Poker’, tag: ‘Community Card’, implemented: false },
-badugi: { name: ‘Badugi’, tag: ‘Draw / Lowball’, implemented: false },
-badeucey: { name: ‘Badeucey’, tag: ‘Draw / Split Pot’, implemented: false },
-badacey: { name: ‘Badacey’, tag: ‘Draw / Split Pot’, implemented: false },
-a5lowball: { name: ‘Ace-to-Five Lowball’, tag: ‘Draw / Lowball’, implemented: false },
-single27: { name: ‘2-7 Single Draw’, tag: ‘Draw / Lowball’, implemented: false },
-doubleomaha: { name: ‘Double Board Omaha’, tag: ‘Community Card’, implemented: false },
-doubleflop: { name: ‘Double Flop Hold'em’, tag: ‘Community Card’, implemented: false },
-tictactoe: { name: ‘Tic-Tac-Toe’, tag: ‘Community Card’, implemented: false },
-elevator: { name: ‘Elevator’, tag: ‘Stud’, implemented: false },
-spitocean: { name: ‘Spit in the Ocean’, tag: ‘Draw / Community’, implemented: false },
-gbu: { name: ‘The Good, the Bad, and the Ugly’, tag: ‘Multi-Pot’, implemented: false },
-baseballbuy: { name: ‘Baseball with Buying Cards’, tag: ‘Stud / Wild’, implemented: false },
-rollyourown: { name: ‘Roll Your Own’, tag: ‘Stud’, implemented: false },
-cincinnati: { name: ‘Cincinnati’, tag: ‘Community Card’, implemented: false },
-tahoe: { name: ‘Tahoe’, tag: ‘Community Card’, implemented: false },
-telesina: { name: ‘Telesina’, tag: ‘Stud’, implemented: false },
-bidpoker: { name: ‘Bid Poker’, tag: ‘Novelty’, implemented: false },
-drpepper: { name: ‘Dr. Pepper’, tag: ‘Stud / Wild’, implemented: false },
-mexicansweat: { name: ‘Mexican Sweat’, tag: ‘Community Card’, implemented: false },
-thebitch: { name: ‘357’, tag: ‘Stud / Wild’, implemented: false },
-s727: { name: ‘727’, tag: ‘Stud’, implemented: false },
-blackmariah: { name: ‘Black Mariah’, tag: ‘Stud / Split Pot’, implemented: false },
-threecard: { name: ‘Three-Card Poker (home)’, tag: ‘Novelty’, implemented: false },
-fourcard: { name: ‘Four-Card Poker (home)’, tag: ‘Novelty’, implemented: false }
+triple27: { name: '2-7 Triple Draw', tag: 'Draw / Lowball', implemented: false },
+lowchicago: { name: 'Low Chicago', tag: 'Stud / Split Pot', implemented: false },
+nightbaseball: { name: 'Night Baseball', tag: 'Stud / Wild', implemented: false },
+kingslittle: { name: 'Kings and Little Ones', tag: 'Stud / Wild', implemented: false },
+draw6: { name: 'Six-Card Draw', tag: 'Draw', implemented: false },
+mississippi: { name: 'Mississippi Stud', tag: 'Stud', implemented: false },
+courchevel: { name: 'Courchevel', tag: 'Community Card', implemented: false },
+irish: { name: 'Irish Poker', tag: 'Community Card', implemented: false },
+badugi: { name: 'Badugi', tag: 'Draw / Lowball', implemented: false },
+badeucey: { name: 'Badeucey', tag: 'Draw / Split Pot', implemented: false },
+badacey: { name: 'Badacey', tag: 'Draw / Split Pot', implemented: false },
+a5lowball: { name: 'Ace-to-Five Lowball', tag: 'Draw / Lowball', implemented: false },
+single27: { name: '2-7 Single Draw', tag: 'Draw / Lowball', implemented: false },
+doubleomaha: { name: 'Double Board Omaha', tag: 'Community Card', implemented: false },
+doubleflop: { name: `Double Flop Hold'em`, tag: 'Community Card', implemented: false },
+tictactoe: { name: 'Tic-Tac-Toe', tag: 'Community Card', implemented: false },
+elevator: { name: 'Elevator', tag: 'Stud', implemented: false },
+spitocean: { name: 'Spit in the Ocean', tag: 'Draw / Community', implemented: false },
+gbu: { name: 'The Good, the Bad, and the Ugly', tag: 'Multi-Pot', implemented: false },
+baseballbuy: { name: 'Baseball with Buying Cards', tag: 'Stud / Wild', implemented: false },
+rollyourown: { name: 'Roll Your Own', tag: 'Stud', implemented: false },
+cincinnati: { name: 'Cincinnati', tag: 'Community Card', implemented: false },
+tahoe: { name: 'Tahoe', tag: 'Community Card', implemented: false },
+telesina: { name: 'Telesina', tag: 'Stud', implemented: false },
+bidpoker: { name: 'Bid Poker', tag: 'Novelty', implemented: false },
+drpepper: { name: 'Dr. Pepper', tag: 'Stud / Wild', implemented: false },
+mexicansweat: { name: 'Mexican Sweat', tag: 'Community Card', implemented: false },
+thebitch: { name: '357', tag: 'Stud / Wild', implemented: false },
+s727: { name: '727', tag: 'Stud', implemented: false },
+blackmariah: { name: 'Black Mariah', tag: 'Stud / Split Pot', implemented: false },
+threecard: { name: 'Three-Card Poker (home)', tag: 'Novelty', implemented: false },
+fourcard: { name: 'Four-Card Poker (home)', tag: 'Novelty', implemented: false }
 };
 
-var GAME_ORDER = [‘holdem’,‘drawfive’,‘stud7’,‘ftq’,‘omaha’,‘omahahilo’,‘razz’,‘triple27’,
-‘chicago’,‘lowchicago’,‘baseball’,‘nightbaseball’,‘anaconda’,‘guts’,‘indian’,‘kingslittle’,
-‘draw6’,‘stud5’,‘mississippi’,‘courchevel’,‘irish’,‘badugi’,‘badeucey’,‘badacey’,‘a5lowball’,
-‘single27’,‘doubleomaha’,‘doubleflop’,‘tictactoe’,‘elevator’,‘spitocean’,‘screwneighbor’,
-‘gbu’,‘baseballbuy’,‘rollyourown’,‘cincinnati’,‘tahoe’,‘telesina’,‘bidpoker’,‘drpepper’,
-‘thebitch’,‘s727’,‘blackmariah’,‘threecard’,‘fourcard’,‘mexicansweat’];
+var GAME_ORDER = ['holdem','drawfive','stud7','ftq','omaha','omahahilo','razz','triple27',
+'chicago','lowchicago','baseball','nightbaseball','anaconda','guts','indian','kingslittle',
+'draw6','stud5','mississippi','courchevel','irish','badugi','badeucey','badacey','a5lowball',
+'single27','doubleomaha','doubleflop','tictactoe','elevator','spitocean','screwneighbor',
+'gbu','baseballbuy','rollyourown','cincinnati','tahoe','telesina','bidpoker','drpepper',
+'thebitch','s727','blackmariah','threecard','fourcard','mexicansweat'];
 
 function rankListHtml() {
-return ‘<div class="rSection"><div class="rHead">Hand Ranking (best to worst)</div>’ +
-’<div class="rankLine">Royal Flush > Straight Flush > Four of a Kind > Full House > ’ +
-‘Flush > Straight > Three of a Kind > Two Pair > Pair > High Card</div></div>’;
+return '<div class="rSection"><div class="rHead">Hand Ranking (best to worst)</div>' +
+'<div class="rankLine">Royal Flush > Straight Flush > Four of a Kind > Full House > ' +
+'Flush > Straight > Three of a Kind > Two Pair > Pair > High Card</div></div>';
 }
 
 // ============================================================
 // GLOBAL STATE
 // ============================================================
 var ST = {
-mode: null,          // ‘tournament’ | ‘dealerchoice’
-chipMode: ‘tourney’,
+mode: null,          // 'tournament' | 'dealerchoice'
+chipMode: 'tourney',
 botCount: 4,
 startChips: 1500,
-blindSpeed: ‘normal’,
-rotation: ‘selected’,
+blindSpeed: 'normal',
+rotation: 'selected',
 selectedGames: { holdem: true, drawfive: true, stud7: true, ftq: true },
 players: [],
 handNumber: 0,
@@ -1433,84 +1425,84 @@ smallBlind: 10,
 bigBlind: 20,
 dealerIndex: 0,
 gameQueueIndex: 0,
-currentGameKey: ‘holdem’
+currentGameKey: 'holdem'
 };
 
 var BLIND_STEPS = [10, 15, 25, 50, 75, 100, 150, 250, 400, 600, 1000, 1500, 2500];
 var BLIND_HANDS_PER_LEVEL = { slow: 10, normal: 6, fast: 3 };
 
-var BOT_NAMES = [‘Jax’, ‘Riley’, ‘Sam’, ‘Morgan’, ‘Casey’, ‘Drew’, ‘Alex’, ‘Quinn’, ‘Skyler’];
+var BOT_NAMES = ['Jax', 'Riley', 'Sam', 'Morgan', 'Casey', 'Drew', 'Alex', 'Quinn', 'Skyler'];
 
 // ============================================================
 // SETUP MODULE (menu interactions)
 // ============================================================
 var Setup = {
-activeSetupScreen: ‘tourney’,
+activeSetupScreen: 'tourney',
 
 stepBots: function(delta) {
 ST.botCount = Math.max(1, Math.min(6, ST.botCount + delta));
-var t = document.getElementById(‘tBotCount’);
-var d = document.getElementById(‘dBotCount’);
+var t = document.getElementById('tBotCount');
+var d = document.getElementById('dBotCount');
 if (t) t.innerHTML = ST.botCount;
 if (d) d.innerHTML = ST.botCount;
 },
 
 pickChip: function(el, prefix) {
-ST.startChips = parseInt(el.getAttribute(‘data-val’), 10);
-var containerId = prefix === ‘t’ ? ‘tChipChoice’ : ‘dChipChoice’;
+ST.startChips = parseInt(el.getAttribute('data-val'), 10);
+var containerId = prefix === 't' ? 'tChipChoice' : 'dChipChoice';
 var container = document.getElementById(containerId);
-var kids = container.getElementsByClassName(‘choiceBtn’);
-for (var i = 0; i < kids.length; i++) kids[i].className = ‘choiceBtn’;
-el.className = ‘choiceBtn active’;
+var kids = container.getElementsByClassName('choiceBtn');
+for (var i = 0; i < kids.length; i++) kids[i].className = 'choiceBtn';
+el.className = 'choiceBtn active';
 },
 
 pickBlind: function(el) {
-ST.blindSpeed = el.getAttribute(‘data-val’);
-var container = document.getElementById(‘tBlindChoice’);
-var kids = container.getElementsByClassName(‘choiceBtn’);
-for (var i = 0; i < kids.length; i++) kids[i].className = ‘choiceBtn’;
-el.className = ‘choiceBtn active’;
+ST.blindSpeed = el.getAttribute('data-val');
+var container = document.getElementById('tBlindChoice');
+var kids = container.getElementsByClassName('choiceBtn');
+for (var i = 0; i < kids.length; i++) kids[i].className = 'choiceBtn';
+el.className = 'choiceBtn active';
 },
 
 pickChipMode: function(mode) {
 ST.chipMode = mode;
-var tb = document.getElementById(‘dChipTourney’);
-var sb = document.getElementById(‘dChipSimple’);
-var note = document.getElementById(‘dChipNote’);
-if (mode === ‘tourney’) {
-tb.className = ‘choiceBtn active’;
-sb.className = ‘choiceBtn’;
-note.innerHTML = ‘Blinds rise over time, elimination when busted.’;
+var tb = document.getElementById('dChipTourney');
+var sb = document.getElementById('dChipSimple');
+var note = document.getElementById('dChipNote');
+if (mode === 'tourney') {
+tb.className = 'choiceBtn active';
+sb.className = 'choiceBtn';
+note.innerHTML = 'Blinds rise over time, elimination when busted.';
 } else {
-tb.className = ‘choiceBtn’;
-sb.className = ‘choiceBtn active’;
-note.innerHTML = ‘Flat blinds, no escalation. Good for a casual, low-pressure night.’;
+tb.className = 'choiceBtn';
+sb.className = 'choiceBtn active';
+note.innerHTML = 'Flat blinds, no escalation. Good for a casual, low-pressure night.';
 }
 },
 
 pickRotation: function(el) {
-ST.rotation = el.getAttribute(‘data-val’);
-var container = document.getElementById(‘dRotationChoice’);
-var kids = container.getElementsByClassName(‘choiceBtn’);
-for (var i = 0; i < kids.length; i++) kids[i].className = ‘choiceBtn’;
-el.className = ‘choiceBtn active’;
-var panel = document.getElementById(‘gameListPanel’);
-panel.style.display = (ST.rotation === ‘all’) ? ‘none’ : ‘block’;
+ST.rotation = el.getAttribute('data-val');
+var container = document.getElementById('dRotationChoice');
+var kids = container.getElementsByClassName('choiceBtn');
+for (var i = 0; i < kids.length; i++) kids[i].className = 'choiceBtn';
+el.className = 'choiceBtn active';
+var panel = document.getElementById('gameListPanel');
+panel.style.display = (ST.rotation === 'all') ? 'none' : 'block';
 },
 
 renderGameList: function() {
-var container = document.getElementById(‘gameListContainer’);
-var html = ‘’;
+var container = document.getElementById('gameListContainer');
+var html = '';
 for (var i = 0; i < GAME_ORDER.length; i++) {
 var key = GAME_ORDER[i];
 var def = GAME_DEFS[key];
 var checked = !!ST.selectedGames[key];
-var disabledCls = def.implemented ? ‘’ : ’ disabled’;
-var checkCls = checked ? ‘checkbox checked’ : ‘checkbox’;
-var onclick = def.implemented ? (‘onclick=“Setup.toggleGame('’ + key + ‘')”’) : ‘’;
-html += ‘<div class=“gameListItem’ + disabledCls + ‘” ’ + onclick + ‘>’ +
-‘<div><div class="gname">’ + def.name + ‘</div><div class="gtag">’ + def.tag + (def.implemented ? ‘’ : ’ · coming soon’) + ‘</div></div>’ +
-‘<div class="' + checkCls + '">’ + (checked ? ‘\u2713’ : ‘’) + ‘</div></div>’;
+var disabledCls = def.implemented ? '' : ' disabled';
+var checkCls = checked ? 'checkbox checked' : 'checkbox';
+var onclick = def.implemented ? ('onclick="Setup.toggleGame(\'' + key + '\')"') : '';
+html += '<div class="gameListItem' + disabledCls + '" ' + onclick + '>' +
+'<div><div class="gname">' + def.name + '</div><div class="gtag">' + def.tag + (def.implemented ? '' : ' · coming soon') + '</div></div>' +
+'<div class="' + checkCls + '">' + (checked ? '\u2713' : '') + '</div></div>';
 }
 container.innerHTML = html;
 },
@@ -1523,21 +1515,21 @@ Setup.renderGameList();
 buildPlayers: function() {
 ST.players = [];
 ST.players.push({
-id: 0, name: ‘You’, isHuman: true, chips: ST.startChips, folded: false,
+id: 0, name: 'You', isHuman: true, chips: ST.startChips, folded: false,
 allIn: false, sittingOut: false, holeCards: [], bet: 0, totalHandBet: 0,
-lastAction: ‘’, eliminated: false
+lastAction: '', eliminated: false
 });
 for (var i = 0; i < ST.botCount; i++) {
 ST.players.push({
 id: i + 1, name: BOT_NAMES[i % BOT_NAMES.length], isHuman: false, chips: ST.startChips,
 folded: false, allIn: false, sittingOut: false, holeCards: [], bet: 0, totalHandBet: 0,
-lastAction: ‘’, eliminated: false
+lastAction: '', eliminated: false
 });
 }
 },
 
 startTournament: function() {
-ST.mode = ‘tournament’;
+ST.mode = 'tournament';
 Setup.buildPlayers();
 ST.handNumber = 0;
 ST.handsSinceBlindUp = 0;
@@ -1545,13 +1537,13 @@ ST.blindLevel = 0;
 ST.smallBlind = BLIND_STEPS[0];
 ST.bigBlind = BLIND_STEPS[0] * 2;
 ST.dealerIndex = 0;
-ST.currentGameKey = ‘holdem’;
-Nav.go(‘tableScreen’);
+ST.currentGameKey = 'holdem';
+Nav.go('tableScreen');
 Game.startNewHand();
 },
 
 startDealerChoice: function() {
-ST.mode = ‘dealerchoice’;
+ST.mode = 'dealerchoice';
 Setup.buildPlayers();
 ST.handNumber = 0;
 ST.handsSinceBlindUp = 0;
@@ -1561,7 +1553,6 @@ ST.bigBlind = BLIND_STEPS[0] * 2;
 ST.dealerIndex = 0;
 ST.gameQueueIndex = 0;
 
-```
 // build the list of games in rotation
 var list = [];
 if (ST.rotation === 'all') {
@@ -1579,13 +1570,12 @@ ST.gameQueueIndex = -1; // will advance to 0 on first startNewHand call
 
 Nav.go('tableScreen');
 Game.startNewHand();
-```
 
 },
 
 pickNextGame: function() {
 var list = ST.gameQueue;
-if (ST.rotation === ‘random’) {
+if (ST.rotation === 'random') {
 return list[Math.floor(Math.random() * list.length)];
 }
 // selected (my list) or all -> sequential rotation
@@ -1594,9 +1584,9 @@ return list[ST.gameQueueIndex];
 }
 };
 
-// populate dealer’s choice game list on load
+// populate dealer's choice game list on load
 Setup.renderGameList();
-document.getElementById(‘gameListPanel’).style.display = (ST.rotation === ‘all’) ? ‘none’ : ‘block’;
+document.getElementById('gameListPanel').style.display = (ST.rotation === 'all') ? 'none' : 'block';
 
 // ============================================================
 // HAND STATE (per-hand, reset each deal)
@@ -1610,14 +1600,14 @@ community: [],
 pot: 0,
 sidePots: [],       // [{amount, eligiblePlayerIds}]
 street: 0,          // index into street sequence for current game
-streetName: ‘’,
+streetName: '',
 currentBet: 0,      // current bet to match this street
 minRaise: 0,
 actingIndex: -1,
 lastAggressorIndex: -1,
 playersActedThisStreet: {},
-stage: ‘dealing’,   // dealing | betting | draw | showdown | done
-wildCard: null,     // for Follow the Queen: {val: X} rank value that’s wild, or null
+stage: 'dealing',   // dealing | betting | draw | showdown | done
+wildCard: null,     // for Follow the Queen: {val: X} rank value that's wild, or null
 queenJustDealt: false,
 log: []
 };
@@ -1682,7 +1672,6 @@ Game.endGame(alive[0]);
 return;
 }
 
-```
 ST.handNumber++;
 
 // blind escalation (tournament mode, or dealer's choice in tourney chip mode)
@@ -1728,27 +1717,25 @@ Table.renderGameTag();
 Table.showRulesIfNeeded(function() {
   Game.dealInitial();
 });
-```
 
 },
 
 endGame: function(winner) {
 HS = null;
-document.getElementById(‘actionMsg’).innerHTML = winner ? (winner.name + ’ wins the tournament!’) : ‘Game over’;
-document.getElementById(‘actionButtons’).style.display = ‘none’;
-var overlay = document.getElementById(‘showdownOverlay’);
-document.getElementById(‘showdownCard’).innerHTML = ‘<h3>’ + (winner ? winner.name + ’ Wins!’ : ‘Game Over’) +
-‘</h3><div style="text-align:center; padding: 10px 0;">’ + (winner ? ‘Congratulations \u2014 last player standing.’ : ‘’) + ‘</div>’ +
-‘<button id="showdownNext" onclick="Table.backToMenu()">Back to Menu</button>’;
-overlay.className = ‘show’;
+document.getElementById('actionMsg').innerHTML = winner ? (winner.name + ' wins the tournament!') : 'Game over';
+document.getElementById('actionButtons').style.display = 'none';
+var overlay = document.getElementById('showdownOverlay');
+document.getElementById('showdownCard').innerHTML = '<h3>' + (winner ? winner.name + ' Wins!' : 'Game Over') +
+'</h3><div style="text-align:center; padding: 10px 0;">' + (winner ? 'Congratulations \u2014 last player standing.' : '') + '</div>' +
+'<button id="showdownNext" onclick="Table.backToMenu()">Back to Menu</button>';
+overlay.className = 'show';
 },
 
 // ––––– DEALING –––––
 dealInitial: function() {
 var key = ST.currentGameKey;
-HS.stage = ‘betting’;
+HS.stage = 'betting';
 
-```
 if (key === 'holdem' || key === 'omaha' || key === 'omahahilo') {
   var holeCount = (key === 'holdem') ? 2 : 4;
   Game.dealDrawCards(holeCount);
@@ -1792,7 +1779,6 @@ if (key === 'holdem' || key === 'omaha' || key === 'omahahilo') {
   return;
 }
 Table.renderAll();
-```
 
 },
 
@@ -1843,7 +1829,7 @@ var key = ST.currentGameKey;
 for (var i = 0; i < players.length; i++) {
 var p = players[i];
 // In 7-card stud variants, the 7th (final) card is dealt face down. 5-card stud has no such down card.
-var faceDown = (key !== ‘stud5’) && (p.holeCards.length === 6);
+var faceDown = (key !== 'stud5') && (p.holeCards.length === 6);
 var c = HS.deck.pop();
 c.hidden = faceDown;
 p.holeCards.push(c);
@@ -1852,13 +1838,13 @@ if (!faceDown) Game.checkQueenWild(c);
 },
 
 checkQueenWild: function(card) {
-if (ST.currentGameKey !== ‘ftq’) return;
+if (ST.currentGameKey !== 'ftq') return;
 if (HS.queenJustDealt) {
 HS.wildCard = card.rank;
 HS.queenJustDealt = false;
-toast(card.rank + “’s are now wild!”, 1800);
+toast(card.rank + "'s are now wild!", 1800);
 }
-if (card.rank === ‘Q’) {
+if (card.rank === 'Q') {
 HS.queenJustDealt = true;
 }
 },
@@ -1897,13 +1883,13 @@ if (player.chips === 0) player.allIn = true;
 
 setupStudBringIn: function() {
 // Bring-in is decided by the visible up-card. Regular stud/Chicago/Baseball/5-card-stud: LOWEST up-card brings in.
-// Razz: HIGHEST up-card brings in (since low hands win, showing a high card is ‘worst’).
+// Razz: HIGHEST up-card brings in (since low hands win, showing a high card is 'worst').
 var key = ST.currentGameKey;
-var upCardIdx = (key === ‘stud5’) ? 1 : 2; // 5-card stud’s up-card is the 2nd card dealt; 7-stud/razz/chicago/baseball show their 3rd card
+var upCardIdx = (key === 'stud5') ? 1 : 2; // 5-card stud's up-card is the 2nd card dealt; 7-stud/razz/chicago/baseball show their 3rd card
 var players = playersInHand();
 var suitOrder = { c: 0, d: 1, h: 2, s: 3 };
 var chosen = null;
-var wantHighest = (key === ‘razz’);
+var wantHighest = (key === 'razz');
 for (var i = 0; i < players.length; i++) {
 var up = players[i].holeCards[upCardIdx];
 if (!chosen) { chosen = players[i]; continue; }
@@ -1923,15 +1909,15 @@ HS.minRaise = ST.bigBlind;
 var idx = ST.players.indexOf(chosen);
 HS.actingIndex = nextActiveIndex(idx);
 HS.lastAggressorIndex = idx;
-HS.streetName = ‘3rd Street’;
-HS.stage = ‘betting’;
+HS.streetName = '3rd Street';
+HS.stage = 'betting';
 HS.playersActedThisStreet = {};
 Game.continueAction();
 },
 
 setupBettingRound: function(streetName) {
 HS.streetName = streetName;
-HS.stage = ‘betting’;
+HS.stage = 'betting';
 HS.playersActedThisStreet = {};
 Game.continueAction();
 },
@@ -1947,7 +1933,6 @@ return;
 }
 if (countNonFolded() <= 1) { Game.finishHandFold(); return; }
 
-```
 var p = ST.players[HS.actingIndex];
 if (!p || p.folded || p.eliminated) {
   HS.actingIndex = nextActiveIndex(HS.actingIndex);
@@ -1965,7 +1950,6 @@ if (p.isHuman) {
   Table.disableHumanControls();
   setTimeout(function() { Bot.act(p); }, 650 + Math.floor(Math.random() * 500));
 }
-```
 
 },
 
@@ -1976,7 +1960,7 @@ Game.applyAction(p, action);
 
 confirmRaise: function() {
 var p = ST.players[0];
-var slider = document.getElementById(‘raiseSlider’);
+var slider = document.getElementById('raiseSlider');
 var addAmt = parseInt(slider.value, 10);
 if (isNaN(addAmt)) addAmt = HS.minRaise;
 var raiseTo = p.bet + addAmt;
@@ -1984,24 +1968,24 @@ var raiseTo = p.bet + addAmt;
 raiseTo = Math.min(raiseTo, p.bet + p.chips);
 var minLegal = Math.min(HS.currentBet + HS.minRaise, p.bet + p.chips);
 if (raiseTo < minLegal) raiseTo = minLegal;
-var action = (HS.currentBet === 0) ? ‘bet’ : ‘raise’;
+var action = (HS.currentBet === 0) ? 'bet' : 'raise';
 Game.applyAction(p, action, raiseTo);
 },
 
 applyAction: function(p, action, raiseTo) {
 var toCall = HS.currentBet - p.bet;
-if (action === ‘fold’) {
+if (action === 'fold') {
 p.folded = true;
-p.lastAction = ‘Fold’;
-} else if (action === ‘checkcall’) {
+p.lastAction = 'Fold';
+} else if (action === 'checkcall') {
 if (toCall <= 0) {
-p.lastAction = ‘Check’;
+p.lastAction = 'Check';
 } else {
 var amt = Math.min(toCall, p.chips);
 Game.postBet(p, amt);
-p.lastAction = (amt < toCall) ? ‘All-In’ : ‘Call’;
+p.lastAction = (amt < toCall) ? 'All-In' : 'Call';
 }
-} else if (action === ‘bet’ || action === ‘raise’) {
+} else if (action === 'bet' || action === 'raise') {
 var target = raiseTo;
 var addAmt = target - p.bet;
 addAmt = Math.min(addAmt, p.chips);
@@ -2010,11 +1994,10 @@ HS.currentBet = Math.max(HS.currentBet, p.bet);
 HS.minRaise = Math.max(HS.minRaise, addAmt);
 HS.lastAggressorIndex = ST.players.indexOf(p);
 HS.playersActedThisStreet = {};
-p.lastAction = p.allIn ? ‘All-In’ : ((action === ‘bet’) ? ’Bet ’ + p.bet : ’Raise to ’ + p.bet);
+p.lastAction = p.allIn ? 'All-In' : ((action === 'bet') ? 'Bet ' + p.bet : 'Raise to ' + p.bet);
 }
 HS.playersActedThisStreet[p.id] = true;
 
-```
 Table.hideRaiseControls();
 
 if (countNonFolded() <= 1) {
@@ -2031,7 +2014,6 @@ if (Game.bettingRoundComplete()) {
 } else {
   Game.continueAction();
 }
-```
 
 },
 
@@ -2054,7 +2036,6 @@ var players = playersInHand();
 for (var i = 0; i < players.length; i++) players[i].bet = 0;
 HS.playersActedThisStreet = {};
 
-```
 if (key === 'holdem' || key === 'omaha' || key === 'omahahilo') {
   Game.advanceHoldemStreet();
 } else if (key === 'drawfive') {
@@ -2066,12 +2047,11 @@ if (key === 'holdem' || key === 'omaha' || key === 'omahahilo') {
 } else if (key === 'indian') {
   Game.doShowdown();
 }
-```
 
 },
 
 advanceStud5Street: function() {
-// Five-Card Stud deals 2 cards up front (1 down, 1 up, labeled ‘3rd Street’ for UI consistency with
+// Five-Card Stud deals 2 cards up front (1 down, 1 up, labeled '3rd Street' for UI consistency with
 // other stud games), then one more card per street until every player has 5 cards, then showdown.
 var players = playersInHand();
 var cardCount = players.length > 0 ? players[0].holeCards.length : 5;
@@ -2079,50 +2059,50 @@ if (cardCount >= 5) {
 Game.doShowdown();
 return;
 }
-var streetNames = { 2: ‘4th Street’, 3: ‘5th Street’, 4: ‘Final Street’ };
+var streetNames = { 2: '4th Street', 3: '5th Street', 4: 'Final Street' };
 Game.dealStudStreet();
 HS.currentBet = 0;
 HS.minRaise = ST.bigBlind;
 HS.actingIndex = Game.studAfterCardActionStarter();
-HS.streetName = streetNames[cardCount] || ‘Final Street’;
+HS.streetName = streetNames[cardCount] || 'Final Street';
 Game.setupBettingRound(HS.streetName);
 },
 
 advanceHoldemStreet: function() {
-if (HS.streetName === ‘preflop’) {
+if (HS.streetName === 'preflop') {
 HS.community.push(HS.deck.pop(), HS.deck.pop(), HS.deck.pop());
 HS.currentBet = 0; HS.minRaise = ST.bigBlind;
 HS.actingIndex = nextActiveIndex(ST.dealerIndex);
-Game.setupBettingRound(‘flop’);
-} else if (HS.streetName === ‘flop’) {
+Game.setupBettingRound('flop');
+} else if (HS.streetName === 'flop') {
 HS.community.push(HS.deck.pop());
 HS.currentBet = 0; HS.minRaise = ST.bigBlind;
 HS.actingIndex = nextActiveIndex(ST.dealerIndex);
-Game.setupBettingRound(‘turn’);
-} else if (HS.streetName === ‘turn’) {
+Game.setupBettingRound('turn');
+} else if (HS.streetName === 'turn') {
 HS.community.push(HS.deck.pop());
 HS.currentBet = 0; HS.minRaise = ST.bigBlind;
 HS.actingIndex = nextActiveIndex(ST.dealerIndex);
-Game.setupBettingRound(‘river’);
-} else if (HS.streetName === ‘river’) {
+Game.setupBettingRound('river');
+} else if (HS.streetName === 'river') {
 Game.doShowdown();
 }
 Table.renderAll();
 },
 
 advanceDrawStreet: function() {
-if (HS.streetName === ‘predraw’) {
-HS.stage = ‘draw’;
-HS.streetName = ‘draw’;
+if (HS.streetName === 'predraw') {
+HS.stage = 'draw';
+HS.streetName = 'draw';
 Game.startDrawPhase();
-} else if (HS.streetName === ‘postdraw’) {
+} else if (HS.streetName === 'postdraw') {
 Game.doShowdown();
 }
 Table.renderAll();
 },
 
 advanceStudStreet: function() {
-var order = [‘3rd Street’, ‘4th Street’, ‘5th Street’, ‘6th Street’, ‘7th Street’];
+var order = ['3rd Street', '4th Street', '5th Street', '6th Street', '7th Street'];
 var idx = order.indexOf(HS.streetName);
 if (idx >= 4) {
 Game.doShowdown();
@@ -2164,8 +2144,8 @@ if (HS.drawQueue.length === 0) {
 HS.currentBet = 0;
 HS.minRaise = ST.bigBlind;
 HS.actingIndex = nextActiveIndex(ST.dealerIndex);
-HS.streetName = ‘postdraw’;
-Game.setupBettingRound(‘postdraw’);
+HS.streetName = 'postdraw';
+Game.setupBettingRound('postdraw');
 Table.hideDrawOverlay();
 Table.renderAll();
 return;
@@ -2212,21 +2192,21 @@ finishHandFold: function() {
 var players = playersInHand();
 var winner = players[0];
 winner.chips += HS.pot;
-Table.showShowdownResult([{ player: winner, amount: HS.pot, handName: ‘Wins uncontested’ }], []);
-HS.stage = ‘done’;
+Table.showShowdownResult([{ player: winner, amount: HS.pot, handName: 'Wins uncontested' }], []);
+HS.stage = 'done';
 },
 
 getPlayerBestHand: function(p) {
 var key = ST.currentGameKey;
 var cards = p.holeCards.slice();
-if (key === ‘holdem’) {
+if (key === 'holdem') {
 cards = cards.concat(HS.community);
 return bestHandHigh(cards);
 }
-if (key === ‘omaha’ || key === ‘omahahilo’) {
+if (key === 'omaha' || key === 'omahahilo') {
 return bestHandOmaha(cards, HS.community);
 }
-if (key === ‘razz’) {
+if (key === 'razz') {
 var lowEv = bestLowHand(cards, false);
 return lowEvToComparable(lowEv);
 }
@@ -2256,13 +2236,13 @@ getPlayerHighSpade: function(p) {
 var best = null;
 for (var i = 0; i < p.holeCards.length; i++) {
 var c = p.holeCards[i];
-if (c.suit === ‘s’ && (!best || c.val > best.val)) best = c;
+if (c.suit === 's' && (!best || c.val > best.val)) best = c;
 }
 return best;
 },
 
 doShowdown: function() {
-HS.stage = ‘showdown’;
+HS.stage = 'showdown';
 var players = playersInHand();
 var results = [];
 for (var i = 0; i < players.length; i++) {
@@ -2271,7 +2251,6 @@ results.push({ player: players[i], ev: ev });
 }
 results.sort(function(a, b) { return compareEval(a.ev, b.ev); });
 
-```
 var key = ST.currentGameKey;
 var payouts;
 if (key === 'omahahilo') {
@@ -2294,7 +2273,6 @@ if (key === 'omahahilo') {
   payouts = Game.distributePot(results);
 }
 Table.showShowdownResult(payouts, results);
-```
 
 },
 
@@ -2305,13 +2283,12 @@ var fullPot = HS.pot;
 if (secondResults.length === 0) {
 return Game.distributePot(highResults);
 }
-// High half gets the pot’s odd chip if any (standard convention). We compute the low/spade half’s
+// High half gets the pot's odd chip if any (standard convention). We compute the low/spade half's
 // exact chip amount first (floor of half), then give the high half everything else via scale=1
 // minus what the second half actually takes - this keeps side-pot eligibility caps correct on the
 // high side while still guaranteeing exact conservation of the full pot.
 var secondHalfAmt = Math.floor(fullPot / 2);
 
-```
 var secondPayouts;
 if (mode === 'low') {
   secondPayouts = Game.distributePotFlat(secondResults, secondHalfAmt, function(r){ return r.ev; }, compareLow, function(ev){ return lowHandName(ev); });
@@ -2357,12 +2334,11 @@ if (diff !== 0 && out.length > 0) {
   out[biggestIdx].player.chips += diff;
 }
 return out;
-```
 
 },
 
 // Generic flat (non-side-pot) distribution of a fixed chip amount among tied winners, used for the
-// low half of hi-lo games and the high-spade half of Chicago (these don’t need side-pot layering
+// low half of hi-lo games and the high-spade half of Chicago (these don't need side-pot layering
 // since every player who reached showdown is automatically eligible for these secondary awards).
 distributePotFlat: function(entries, amount, getKey, compareFn, nameFn) {
 if (entries.length === 0 || amount <= 0) return [];
@@ -2385,9 +2361,9 @@ return payouts;
 distributePot: function(results, potOverride) {
 // Simplified pot distribution: supports all-in side pots via totalHandBet caps.
 // potOverride, when given (0-1), scales every payout layer by that fraction of each
-// contributor’s stake - used for splitting a pot in half between high/low or high/spade winners
+// contributor's stake - used for splitting a pot in half between high/low or high/spade winners
 // while still respecting all-in side-pot eligibility caps correctly.
-var scale = (typeof potOverride === ‘number’) ? potOverride : 1;
+var scale = (typeof potOverride === 'number') ? potOverride : 1;
 var contributions = [];
 for (var i = 0; i < ST.players.length; i++) {
 var p = ST.players[i];
@@ -2401,7 +2377,6 @@ caps.sort(function(a, b) { return a - b; });
 var uniqueCaps = [];
 for (i = 0; i < caps.length; i++) if (uniqueCaps.indexOf(caps[i]) === -1) uniqueCaps.push(caps[i]);
 
-```
 var prevCap = 0;
 var payoutMap = {};
 for (i = 0; i < uniqueCaps.length; i++) {
@@ -2444,7 +2419,6 @@ for (var pid in payoutMap) {
   payouts.push({ player: pl, amount: payoutMap[pid], handName: ev ? ev.name : '' });
 }
 return payouts;
-```
 
 },
 
@@ -2467,7 +2441,7 @@ return m;
 function padForEval(cards) {
 if (cards.length >= 5) return cards;
 var padded = cards.slice();
-var fillers = [makeCard(‘2’,‘c’), makeCard(‘3’,‘c’), makeCard(‘4’,‘c’), makeCard(‘5’,‘c’), makeCard(‘7’,‘d’)];
+var fillers = [makeCard('2','c'), makeCard('3','c'), makeCard('4','c'), makeCard('5','c'), makeCard('7','d')];
 var fi = 0;
 while (padded.length < 5) { padded.push(fillers[fi]); fi++; }
 return padded;
@@ -2479,7 +2453,7 @@ var out = [];
 var wildCount = 0;
 for (var i = 0; i < cards.length; i++) {
 var c = cards[i];
-if (c.rank === ‘Q’ || c.rank === wildRank) {
+if (c.rank === 'Q' || c.rank === wildRank) {
 wildCount++;
 } else {
 out.push(c);
@@ -2487,15 +2461,15 @@ out.push(c);
 }
 // Represent wilds as best possible remaining card: extra aces of unused suits, simplified as pushing high aces
 var usedAceSuits = {};
-for (i = 0; i < out.length; i++) if (out[i].rank === ‘A’) usedAceSuits[out[i].suit] = true;
-var suitPool = [‘s’,‘h’,‘d’,‘c’];
+for (i = 0; i < out.length; i++) if (out[i].rank === 'A') usedAceSuits[out[i].suit] = true;
+var suitPool = ['s','h','d','c'];
 for (i = 0; i < wildCount; i++) {
 var suit = null;
 for (var s = 0; s < suitPool.length; s++) {
 if (!usedAceSuits[suitPool[s]]) { suit = suitPool[s]; usedAceSuits[suitPool[s]] = true; break; }
 }
-if (!suit) suit = ‘s’;
-out.push(makeCard(‘A’, suit));
+if (!suit) suit = 's';
+out.push(makeCard('A', suit));
 }
 return out;
 }
@@ -2507,7 +2481,7 @@ var Bot = {
 // crude hand strength 0-1 based on current best evaluation rank + tiebreak, scaled
 estimateStrength: function(p) {
 // preflop holdem (only 2 hole cards, no community yet): use hole-card heuristic, skip the 5-card evaluator entirely
-if (ST.currentGameKey === ‘holdem’ && HS.community.length === 0) {
+if (ST.currentGameKey === 'holdem' && HS.community.length === 0) {
 return Bot.preflopHoldemStrength(p);
 }
 // stud/draw games before enough cards are dealt to make 5: fall back to a simple high-card heuristic
@@ -2559,7 +2533,6 @@ var potOdds = toCall > 0 ? toCall / (HS.pot + toCall) : 0;
 var randomFactor = (Math.random() - 0.5) * 0.18; // small unpredictability
 var effStrength = strength + randomFactor;
 
-```
 if (toCall <= 0) {
   // can check; decide whether to bet
   if (effStrength > 0.62 && p.chips > 0) {
@@ -2580,7 +2553,6 @@ if (effStrength < potOdds - 0.05) {
 } else {
   Game.applyAction(p, 'checkcall');
 }
-```
 
 },
 
@@ -2633,12 +2605,12 @@ return positions;
 },
 
 renderGameTag: function() {
-document.getElementById(‘gameTag’).innerHTML = GAME_DEFS[ST.currentGameKey].name;
+document.getElementById('gameTag').innerHTML = GAME_DEFS[ST.currentGameKey].name;
 },
 
 showRulesIfNeeded: function(cb) {
 var key = ST.currentGameKey;
-if (ST.mode === ‘dealerchoice’ && !Table.rulesSeenForGame[key]) {
+if (ST.mode === 'dealerchoice' && !Table.rulesSeenForGame[key]) {
 Table.rulesSeenForGame[key] = true;
 Table.showRules(false, cb);
 } else if (ST.handNumber === 1) {
@@ -2650,19 +2622,19 @@ cb();
 
 showRules: function(manual, cb) {
 var def = GAME_DEFS[ST.currentGameKey];
-var overlay = document.getElementById(‘rulesOverlay’);
-var card = document.getElementById(‘rulesCard’);
-card.innerHTML = ‘<h2>’ + def.name + ‘</h2><div class="rTag">’ + def.tag + ‘</div>’ +
+var overlay = document.getElementById('rulesOverlay');
+var card = document.getElementById('rulesCard');
+card.innerHTML = '<h2>' + def.name + '</h2><div class="rTag">' + def.tag + '</div>' +
 def.rulesHtml() +
-‘<button id="rulesGotIt">Got It \u2014 Deal Me In</button>’;
-overlay.className = ‘rulesOverlay show’;
-overlay.className = ‘show’;
-document.getElementById(‘rulesGotIt’).onclick = function() {
-overlay.className = ‘’;
+'<button id="rulesGotIt">Got It \u2014 Deal Me In</button>';
+overlay.className = 'rulesOverlay show';
+overlay.className = 'show';
+document.getElementById('rulesGotIt').onclick = function() {
+overlay.className = '';
 if (cb) cb();
 };
 if (manual) {
-document.getElementById(‘rulesGotIt’).innerHTML = ‘Close’;
+document.getElementById('rulesGotIt').innerHTML = 'Close';
 }
 },
 
@@ -2677,84 +2649,84 @@ Table.renderMyStatsBar();
 
 renderMyStatsBar: function() {
 var p = ST.players[0];
-var html = ‘<span>’ + p.chips + ’ chips</span>’;
-if (p.bet > 0) html += ’ <span class="msDim">· bet ’ + p.bet + ‘</span>’;
-if (p.folded) html += ’ <span class="msDim">· folded</span>’;
-else if (p.allIn) html += ’ <span class="msDim">· all-in</span>’;
-document.getElementById(‘myStatsBar’).innerHTML = html;
+var html = '<span>' + p.chips + ' chips</span>';
+if (p.bet > 0) html += ' <span class="msDim">· bet ' + p.bet + '</span>';
+if (p.folded) html += ' <span class="msDim">· folded</span>';
+else if (p.allIn) html += ' <span class="msDim">· all-in</span>';
+document.getElementById('myStatsBar').innerHTML = html;
 },
 
 renderTopBar: function() {
-var left = (ST.smallBlind + ‘/’ + ST.bigBlind + ’ Blinds’);
-document.getElementById(‘tbLeft’).innerHTML = left;
-document.getElementById(‘tbRight’).innerHTML = ’Hand ’ + ST.handNumber;
+var left = (ST.smallBlind + '/' + ST.bigBlind + ' Blinds');
+document.getElementById('tbLeft').innerHTML = left;
+document.getElementById('tbRight').innerHTML = 'Hand ' + ST.handNumber;
 },
 
 renderPot: function() {
 var total = HS.pot;
 var players = playersInHand();
 for (var i = 0; i < players.length; i++) total += 0; // pot already includes bets posted; live street bets shown per-seat
-document.getElementById(‘potArea’).innerHTML = ’Pot: ’ + HS.pot;
+document.getElementById('potArea').innerHTML = 'Pot: ' + HS.pot;
 },
 
 renderCommunity: function() {
-var html = ‘’;
+var html = '';
 for (var i = 0; i < HS.community.length; i++) html += cardHtml(HS.community[i]);
-document.getElementById(‘communityArea’).innerHTML = html;
+document.getElementById('communityArea').innerHTML = html;
 },
 
 renderSeats: function() {
-var layer = document.getElementById(‘seatsLayer’);
+var layer = document.getElementById('seatsLayer');
 var n = ST.players.length;
 var positions = Table.seatPositions(n);
-var html = ‘’;
+var html = '';
 for (var i = 0; i < n; i++) {
 var p = ST.players[i];
 var pos = positions[i];
 if (p.eliminated) continue;
-var avatarCls = ‘seatAvatar’;
-if (i === HS.actingIndex && HS.stage === ‘betting’) avatarCls += ’ active’;
-if (p.folded) avatarCls += ’ folded’;
+var avatarCls = 'seatAvatar';
+if (i === HS.actingIndex && HS.stage === 'betting') avatarCls += ' active';
+if (p.folded) avatarCls += ' folded';
 var isDealer = (i === ST.dealerIndex);
-var cardsHtml = ‘’;
+var cardsHtml = '';
 if (p.isHuman) {
-cardsHtml = ‘’; // human cards shown big in handArea
+cardsHtml = ''; // human cards shown big in handArea
 } else {
 for (var c = 0; c < p.holeCards.length; c++) {
 var card = p.holeCards[c];
-if (ST.currentGameKey === ‘holdem’ || ST.currentGameKey === ‘drawfive’) {
-cardsHtml += miniCardHtml(HS.stage === ‘showdown’ && !p.folded ? card : { hidden: true });
+if (ST.currentGameKey === 'holdem' || ST.currentGameKey === 'drawfive') {
+cardsHtml += miniCardHtml(HS.stage === 'showdown' && !p.folded ? card : { hidden: true });
 } else {
 cardsHtml += miniCardHtml(card.hidden ? { hidden: true } : card);
 }
 }
 }
-var statusText = p.allIn ? ‘ALL IN’ : (p.folded ? ‘FOLDED’ : (p.lastAction || ‘’));
-html += ‘<div class="seat" style="left:' + pos.left + '%; top:' + pos.top + '%; margin-left:-39px;">’ +
-‘<div class="' + avatarCls + '">’ + (p.isHuman ? ‘YOU’ : p.name.charAt(0)) +
-(isDealer ? ‘<div class="dealerChip">D</div>’ : ‘’) + ‘</div>’ +
-‘<div class="seatName">’ + p.name + ‘</div>’ +
-‘<div class="seatChips">’ + p.chips + ‘</div>’ +
-(p.bet > 0 ? ’<div class="seatBet">bet ’ + p.bet + ‘</div>’ : ‘’) +
-‘<div class="seatCards">’ + cardsHtml + ‘</div>’ +
-‘<div class="seatStatus">’ + statusText + ‘</div>’ +
-‘</div>’;
+var statusText = p.allIn ? 'ALL IN' : (p.folded ? 'FOLDED' : (p.lastAction || ''));
+html += '<div class="seat" style="left:' + pos.left + '%; top:' + pos.top + '%; margin-left:-39px;">' +
+'<div class="' + avatarCls + '">' + (p.isHuman ? 'YOU' : p.name.charAt(0)) +
+(isDealer ? '<div class="dealerChip">D</div>' : '') + '</div>' +
+'<div class="seatName">' + p.name + '</div>' +
+'<div class="seatChips">' + p.chips + '</div>' +
+(p.bet > 0 ? '<div class="seatBet">bet ' + p.bet + '</div>' : '') +
+'<div class="seatCards">' + cardsHtml + '</div>' +
+'<div class="seatStatus">' + statusText + '</div>' +
+'</div>';
 }
 layer.innerHTML = html;
 },
 
 renderHumanHand: function() {
 var p = ST.players[0];
-var html = ‘’;
-var showSelectable = (HS.stage === ‘draw’ && document.getElementById(‘drawOverlay’).className.indexOf(‘show’) >= 0);
+var html = '';
+var showSelectable = (HS.stage === 'draw' && document.getElementById('drawOverlay').className.indexOf('show') >= 0);
 for (var i = 0; i < p.holeCards.length; i++) {
 var card = p.holeCards[i];
 var selected = p.discardSelection && p.discardSelection.indexOf(i) >= 0;
-var extra = selected ? ’ style=“opacity:0.4; -webkit-transform: translateY(-10px); transform: translateY(-10px);”’ : ‘’;
-var clickAttr = showSelectable ? ’ onclick=“Table.toggleDiscard(’ + i + ‘)”’ : ‘’;
-html += ‘<div’ + clickAttr + extra + ‘>’ + cardHtml(card.hidden ? { hidden: true } : card) + ‘</div>’;
+var extra = selected ? ' style="opacity:0.4; -webkit-transform: translateY(-10px); transform: translateY(-10px);"' : '';
+var clickAttr = showSelectable ? ' onclick="Table.toggleDiscard(' + i + ')"' : '';
+html += '<div' + clickAttr + extra + '>' + cardHtml(card.hidden ? { hidden: true } : card) + '</div>';
 }
-document.getElementById(‘handArea’).innerHTML = html;
+document.getElementById('handArea').innerHTML = html;
 },
 
 toggleDiscard: function(idx) {
@@ -2767,27 +2739,26 @@ Table.renderHumanHand();
 },
 
 showDrawOverlay: function(p) {
-document.getElementById(‘drawOverlay’).className = ‘show’;
-document.getElementById(‘actionBar’).style.display = ‘none’;
+document.getElementById('drawOverlay').className = 'show';
+document.getElementById('actionBar').style.display = 'none';
 p.discardSelection = [];
 Table.renderHumanHand();
 },
 
 hideDrawOverlay: function() {
-document.getElementById(‘drawOverlay’).className = ‘’;
-document.getElementById(‘actionBar’).style.display = ‘block’;
+document.getElementById('drawOverlay').className = '';
+document.getElementById('actionBar').style.display = 'block';
 },
 
 enableHumanControls: function(p) {
-document.getElementById(‘actionButtons’).style.display = ‘flex’;
+document.getElementById('actionButtons').style.display = 'flex';
 var toCall = HS.currentBet - p.bet;
-var msg = toCall > 0 ? (’To call: ’ + toCall) : ‘Your action’;
-document.getElementById(‘actionMsg’).innerHTML = msg;
-var ccBtn = document.getElementById(‘checkCallBtn’);
-ccBtn.innerHTML = toCall > 0 ? (’Call ’ + toCall) : ‘Check’;
+var msg = toCall > 0 ? ('To call: ' + toCall) : 'Your action';
+document.getElementById('actionMsg').innerHTML = msg;
+var ccBtn = document.getElementById('checkCallBtn');
+ccBtn.innerHTML = toCall > 0 ? ('Call ' + toCall) : 'Check';
 Table.hideRaiseControls();
 
-```
 var slider = document.getElementById('raiseSlider');
 var minR = HS.currentBet + HS.minRaise - p.bet;
 var maxR = p.chips;
@@ -2795,65 +2766,64 @@ slider.min = Math.min(minR, maxR);
 slider.max = maxR;
 slider.value = Math.min(minR, maxR);
 Table.updateRaiseVal();
-```
 
 },
 
 disableHumanControls: function() {
-document.getElementById(‘actionMsg’).innerHTML = ‘Waiting for opponents…’;
-document.getElementById(‘actionButtons’).style.display = ‘none’;
+document.getElementById('actionMsg').innerHTML = 'Waiting for opponents…';
+document.getElementById('actionButtons').style.display = 'none';
 Table.hideRaiseControls();
 },
 
 toggleRaise: function() {
-var el = document.getElementById(‘raiseControls’);
-el.className = (el.className.indexOf(‘show’) >= 0) ? ‘’ : ‘show’;
+var el = document.getElementById('raiseControls');
+el.className = (el.className.indexOf('show') >= 0) ? '' : 'show';
 },
 
 hideRaiseControls: function() {
-document.getElementById(‘raiseControls’).className = ‘’;
+document.getElementById('raiseControls').className = '';
 },
 
 updateRaiseVal: function() {
 var p = ST.players[0];
-var slider = document.getElementById(‘raiseSlider’);
+var slider = document.getElementById('raiseSlider');
 var addAmt = parseInt(slider.value, 10);
 var total = p.bet + addAmt;
-document.getElementById(‘raiseVal’).innerHTML = ’Raise to ’ + total;
+document.getElementById('raiseVal').innerHTML = 'Raise to ' + total;
 },
 
 showShowdownResult: function(payouts, results) {
-var overlay = document.getElementById(‘showdownOverlay’);
-var html = ‘<h3>Hand Result</h3>’;
+var overlay = document.getElementById('showdownOverlay');
+var html = '<h3>Hand Result</h3>';
 if (results && results.length > 0) {
 for (var i = 0; i < results.length; i++) {
 var r = results[i];
 var wonAmt = 0;
 for (var j = 0; j < payouts.length; j++) if (payouts[j].player.id === r.player.id) wonAmt = payouts[j].amount;
-html += ‘<div class="sdRow"><div class="sdName">’ + r.player.name + ‘</div>’ +
-‘<div class="sdHand">’ + r.ev.name + ‘</div>’ +
-‘<div class="sdWin">’ + (wonAmt > 0 ? ‘+’ + wonAmt : ‘’) + ‘</div></div>’;
+html += '<div class="sdRow"><div class="sdName">' + r.player.name + '</div>' +
+'<div class="sdHand">' + r.ev.name + '</div>' +
+'<div class="sdWin">' + (wonAmt > 0 ? '+' + wonAmt : '') + '</div></div>';
 }
 } else if (payouts.length > 0) {
-html += ‘<div class="sdRow"><div class="sdName">’ + payouts[0].player.name + ‘</div>’ +
-‘<div class="sdHand">’ + payouts[0].handName + ‘</div>’ +
-‘<div class="sdWin">+’ + payouts[0].amount + ‘</div></div>’;
+html += '<div class="sdRow"><div class="sdName">' + payouts[0].player.name + '</div>' +
+'<div class="sdHand">' + payouts[0].handName + '</div>' +
+'<div class="sdWin">+' + payouts[0].amount + '</div></div>';
 }
-html += ‘<button id="showdownNext">Next Hand</button>’;
-document.getElementById(‘showdownCard’).innerHTML = html;
-overlay.className = ‘show’;
-document.getElementById(‘showdownNext’).onclick = function() {
+html += '<button id="showdownNext">Next Hand</button>';
+document.getElementById('showdownCard').innerHTML = html;
+overlay.className = 'show';
+document.getElementById('showdownNext').onclick = function() {
 Game.proceedToNextHand();
 };
 },
 
 hideShowdown: function() {
-document.getElementById(‘showdownOverlay’).className = ‘’;
+document.getElementById('showdownOverlay').className = '';
 },
 
 backToMenu: function() {
-document.getElementById(‘showdownOverlay’).className = ‘’;
-Nav.go(‘mainMenuScreen’);
+document.getElementById('showdownOverlay').className = '';
+Nav.go('mainMenuScreen');
 }
 };
 </script>
