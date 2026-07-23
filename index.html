@@ -1166,6 +1166,21 @@ for (var i = 0; i < sorted.length; i++) parts.push(names[sorted[i]] || sorted[i]
 return parts.join(’-’) + ’ low’;
 }
 
+// Converts a bestLowHand() result (ace-to-five, lower is better) into a compareEval()-compatible
+// object (rank/tiebreak, where compareEval treats higher tiebreak values as better) so Razz can
+// reuse all the existing compareEval-based sorting and pot-distribution machinery unmodified.
+// A missing low (no 5 distinct cards, extremely rare with 7 cards) is treated as the worst possible hand.
+function lowEvToComparable(lowEv) {
+if (!lowEv) {
+return { rank: -1, tiebreak: [0, 0, 0, 0, 0], name: ‘No Low Hand’ };
+}
+var inverted = [];
+for (var i = 0; i < lowEv.tiebreak.length; i++) {
+inverted.push(15 - lowEv.tiebreak[i]); // smaller original value -> larger inverted value -> compareEval ranks it higher (better)
+}
+return { rank: 0, tiebreak: inverted, name: lowHandName(lowEv) };
+}
+
 // ============================================================
 // GAME DEFINITIONS (rules text + metadata) - Phase 1 implemented games
 // Phase 2 (not yet playable, shown grayed in Dealer’s Choice list): rest of the ~50 variant list
@@ -1221,21 +1236,142 @@ return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
 }
 },
 
-// –– Phase 2 placeholders (data present, not yet implemented as playable games) ––
-omaha: { name: ‘Omaha’, tag: ‘Community Card’, implemented: false },
-omahahilo: { name: ‘Omaha Hi-Lo (Eight or Better)’, tag: ‘Community / Split Pot’, implemented: false },
-razz: { name: ‘Razz’, tag: ‘Stud / Lowball’, implemented: false },
+omaha: {
+name: ‘Omaha’,
+tag: ‘Community Card’,
+implemented: true,
+rulesHtml: function() {
+return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
+‘<li>Each player gets 4 hole cards, face down.</li>’ +
+‘<li>5 community cards are dealt in stages: Flop (3), Turn (1), River (1), with betting after each.</li>’ +
+‘<li>You must use exactly 2 of your hole cards and exactly 3 community cards to make your best 5-card hand.</li>’ +
+‘</ul></div>’ + rankListHtml();
+}
+},
+omahahilo: {
+name: ‘Omaha Hi-Lo (Eight or Better)’,
+tag: ‘Community / Split Pot’,
+implemented: true,
+rulesHtml: function() {
+return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
+‘<li>Played like Omaha: 4 hole cards, 5 community cards, must use exactly 2+3.</li>’ +
+‘<li>The pot splits between the best high hand and the best qualifying low hand (8-high or better, no pairs).</li>’ +
+‘<li>If no hand qualifies for low, the best high hand takes the whole pot.</li>’ +
+‘<li>A player can use different card combinations for their high and low hands.</li>’ +
+‘</ul></div>’ + rankListHtml();
+}
+},
+razz: {
+name: ‘Razz’,
+tag: ‘Stud / Lowball’,
+implemented: true,
+rulesHtml: function() {
+return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
+‘<li>Dealt exactly like Seven-Card Stud: 2 down, 1 up, then 4 more streets.</li>’ +
+‘<li>Lowest hand wins — Aces are low, straights and flushes don't count against you.</li>’ +
+‘<li>The best possible hand is A-2-3-4-5 (the “wheel”).</li>’ +
+‘<li>Highest up-card brings in the betting on 3rd Street (opposite of regular stud).</li>’ +
+‘</ul></div><div class="rSection"><div class="rHead">Low Hand Ranking (best to worst)</div>’ +
+‘<div class="rankLine">A-2-3-4-5 > A-2-3-4-6 > … > 2-3-4-5-7 > … down to 10-J-Q-K-A high</div></div>’;
+}
+},
+anaconda: {
+name: ‘Anaconda (Pass the Trash)’,
+tag: ‘Draw / Pass’,
+implemented: true,
+rulesHtml: function() {
+return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
+‘<li>Each player is dealt 7 cards, face down. No betting yet.</li>’ +
+‘<li>Everyone chooses 3 cards and passes them to the player on their left, all at once.</li>’ +
+‘<li>After receiving 3 cards, everyone again passes 2 cards to the left, then finally 1 card to the left.</li>’ +
+‘<li>Each player now has 7 cards and picks their best 5 to keep. A round of betting follows, then showdown.</li>’ +
+‘</ul></div>’ + rankListHtml();
+}
+},
+guts: {
+name: ‘Guts’,
+tag: ‘Multi-Pot’,
+implemented: true,
+rulesHtml: function() {
+return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
+‘<li>Everyone is dealt 3 cards face down. After looking, each player secretly decides IN or OUT.</li>’ +
+‘<li>Everyone reveals their choice at once. Players who chose OUT contribute nothing and fold.</li>’ +
+‘<li>Among players who chose IN, the best 3-card hand wins the pot. Every other IN player who wasn't the winner must match the pot into the next round!</li>’ +
+‘<li>If nobody chooses IN, or only one player does, the pot carries over and grows for the next hand.</li>’ +
+‘<li>This repeats — pots can grow large fast, so choose IN carefully.</li>’ +
+‘</ul></div>’ + rankListHtml();
+}
+},
+indian: {
+name: “Indian Poker (Blind Man’s Bluff)”,
+tag: ‘Novelty’,
+implemented: true,
+rulesHtml: function() {
+return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
+‘<li>Each player gets exactly 1 card, but holds it facing outward — you see everyone else's card, but not your own.</li>’ +
+‘<li>Betting proceeds based on reading opponents' reactions and card values, since you must judge your own card blind.</li>’ +
+‘<li>At showdown, cards are flipped around: highest single card wins.</li>’ +
+‘</ul></div><div class="rSection"><div class="rHead">Card Ranking (best to worst)</div>’ +
+‘<div class="rankLine">A > K > Q > J > 10 > 9 > 8 > 7 > 6 > 5 > 4 > 3 > 2</div></div>’
+}
+},
+screwneighbor: {
+name: ‘Screw Your Neighbor’,
+tag: ‘Novelty’,
+implemented: true,
+rulesHtml: function() {
+return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
+‘<li>Each player gets exactly 1 card, face down, and may look at their own card once.</li>’ +
+‘<li>On your turn, you may swap your card with the next player's (they can't refuse), or knock to keep yours.</li>’ +
+‘<li>After everyone has had a turn, all cards are revealed — lowest card loses a chip (or is eliminated in some house rules).</li>’ +
+‘<li>Kings can often not be swapped away in some house rules — this table always allows swaps for simplicity.</li>’ +
+‘</ul></div><div class="rSection"><div class="rHead">Card Ranking (best to worst)</div>’ +
+‘<div class="rankLine">A > K > Q > J > 10 > 9 > 8 > 7 > 6 > 5 > 4 > 3 > 2</div></div>’
+}
+},
+chicago: {
+name: ‘Chicago (High Chicago)’,
+tag: ‘Stud / Split Pot’,
+implemented: true,
+rulesHtml: function() {
+return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
+‘<li>Dealt exactly like Seven-Card Stud.</li>’ +
+‘<li>At showdown, the pot splits in half: one half to the best 5-card poker hand, the other half to whoever has the highest spade in the hole.</li>’ +
+‘<li>It's possible (and great) to scoop the whole pot by winning both halves.</li>’ +
+‘</ul></div>’ + rankListHtml();
+}
+},
+baseball: {
+name: ‘Baseball’,
+tag: ‘Stud / Wild’,
+implemented: true,
+rulesHtml: function() {
+return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
+‘<li>Dealt like Seven-Card Stud. All 3's dealt are wild, for everyone, all game.</li>’ +
+‘<li>Whenever a 4 is dealt face up, that player may pay double the current bet to “buy” an extra replacement card face down.</li>’ +
+‘<li>If a 9 is dealt face up to anyone, betting immediately doubles for that round.</li>’ +
+‘<li>Best 5-card hand (with wild 3's) wins at showdown.</li>’ +
+‘</ul></div>’ + rankListHtml();
+}
+},
+stud5: {
+name: ‘Five-Card Stud’,
+tag: ‘Stud’,
+implemented: true,
+rulesHtml: function() {
+return ‘<div class="rSection"><div class="rHead">How it plays</div><ul>’ +
+‘<li>Each player gets 1 card down, 1 up, then 3 more streets of 1 card each, all face up.</li>’ +
+‘<li>Betting after every card. Lowest up-card acts first on the first street (“bring-in”).</li>’ +
+‘<li>Best 5-card hand from your cards wins at showdown — there's no draw, so every card matters.</li>’ +
+‘</ul></div>’ + rankListHtml();
+}
+},
+// –– Phase 3 placeholders (data present, not yet implemented as playable games) ––
 triple27: { name: ‘2-7 Triple Draw’, tag: ‘Draw / Lowball’, implemented: false },
-chicago: { name: ‘Chicago (High Chicago)’, tag: ‘Stud / Split Pot’, implemented: false },
 lowchicago: { name: ‘Low Chicago’, tag: ‘Stud / Split Pot’, implemented: false },
-baseball: { name: ‘Baseball’, tag: ‘Stud / Wild’, implemented: false },
 nightbaseball: { name: ‘Night Baseball’, tag: ‘Stud / Wild’, implemented: false },
-anaconda: { name: ‘Anaconda (Pass the Trash)’, tag: ‘Draw / Pass’, implemented: false },
-guts: { name: ‘Guts’, tag: ‘Multi-Pot’, implemented: false },
-indian: { name: ‘Indian Poker (Blind Man's Bluff)’, tag: ‘Novelty’, implemented: false },
 kingslittle: { name: ‘Kings and Little Ones’, tag: ‘Stud / Wild’, implemented: false },
 draw6: { name: ‘Six-Card Draw’, tag: ‘Draw’, implemented: false },
-stud5: { name: ‘Five-Card Stud’, tag: ‘Stud’, implemented: false },
 mississippi: { name: ‘Mississippi Stud’, tag: ‘Stud’, implemented: false },
 courchevel: { name: ‘Courchevel’, tag: ‘Community Card’, implemented: false },
 irish: { name: ‘Irish Poker’, tag: ‘Community Card’, implemented: false },
@@ -1249,7 +1385,6 @@ doubleflop: { name: ‘Double Flop Hold'em’, tag: ‘Community Card’, implem
 tictactoe: { name: ‘Tic-Tac-Toe’, tag: ‘Community Card’, implemented: false },
 elevator: { name: ‘Elevator’, tag: ‘Stud’, implemented: false },
 spitocean: { name: ‘Spit in the Ocean’, tag: ‘Draw / Community’, implemented: false },
-screwneighbor: { name: ‘Screw Your Neighbor’, tag: ‘Novelty’, implemented: false },
 gbu: { name: ‘The Good, the Bad, and the Ugly’, tag: ‘Multi-Pot’, implemented: false },
 baseballbuy: { name: ‘Baseball with Buying Cards’, tag: ‘Stud / Wild’, implemented: false },
 rollyourown: { name: ‘Roll Your Own’, tag: ‘Stud’, implemented: false },
@@ -1271,7 +1406,7 @@ var GAME_ORDER = [‘holdem’,‘drawfive’,‘stud7’,‘ftq’,‘omaha’,
 ‘draw6’,‘stud5’,‘mississippi’,‘courchevel’,‘irish’,‘badugi’,‘badeucey’,‘badacey’,‘a5lowball’,
 ‘single27’,‘doubleomaha’,‘doubleflop’,‘tictactoe’,‘elevator’,‘spitocean’,‘screwneighbor’,
 ‘gbu’,‘baseballbuy’,‘rollyourown’,‘cincinnati’,‘tahoe’,‘telesina’,‘bidpoker’,‘drpepper’,
-‘thebitch’,‘s727’,‘blackmariah’,‘threecard’,‘fourcard’];
+‘thebitch’,‘s727’,‘blackmariah’,‘threecard’,‘fourcard’,‘mexicansweat’];
 
 function rankListHtml() {
 return ‘<div class="rSection"><div class="rHead">Hand Ranking (best to worst)</div>’ +
@@ -1614,21 +1749,61 @@ var key = ST.currentGameKey;
 HS.stage = ‘betting’;
 
 ```
-if (key === 'holdem') {
-  Game.dealHoldemHole();
+if (key === 'holdem' || key === 'omaha' || key === 'omahahilo') {
+  var holeCount = (key === 'holdem') ? 2 : 4;
+  Game.dealDrawCards(holeCount);
   Game.postBlinds();
   Game.setupBettingRound('preflop');
 } else if (key === 'drawfive') {
   Game.dealDrawCards(5);
   Game.postBlinds();
   Game.setupBettingRound('predraw');
-} else if (key === 'stud7' || key === 'ftq') {
+} else if (key === 'stud7' || key === 'ftq' || key === 'chicago' || key === 'baseball') {
   Game.dealStudThirdStreet();
   Game.setupStudBringIn();
+} else if (key === 'razz') {
+  Game.dealStudThirdStreet();
+  Game.setupStudBringIn();
+} else if (key === 'stud5') {
+  Game.dealStud5FirstCards();
+  Game.setupStudBringIn();
+} else if (key === 'anaconda') {
+  Game.dealDrawCards(7);
+  HS.stage = 'pass';
+  HS.passRound = 0;
+  Game.startAnacondaPass();
+  return;
+} else if (key === 'guts') {
+  Game.dealDrawCards(3);
+  HS.stage = 'gutsDecision';
+  Game.startGutsDecision();
+  return;
+} else if (key === 'indian') {
+  Game.dealDrawCards(1);
+  Game.postBlinds();
+  Game.setupBettingRound('indian');
+} else if (key === 'screwneighbor') {
+  Game.dealDrawCards(1);
+  HS.currentBet = 0;
+  HS.minRaise = ST.bigBlind;
+  HS.actingIndex = nextActiveIndex(ST.dealerIndex);
+  HS.stage = 'swap';
+  Game.startScrewSwapPhase();
+  return;
 }
 Table.renderAll();
 ```
 
+},
+
+dealStud5FirstCards: function() {
+var players = playersInHand();
+for (var i = 0; i < players.length; i++) {
+var p = players[i];
+var c1 = HS.deck.pop(); c1.hidden = true;
+var c2 = HS.deck.pop(); c2.hidden = false;
+p.holeCards = [c1, c2];
+}
 },
 
 dealHoldemHole: function() {
@@ -1664,9 +1839,11 @@ Game.checkQueenWild(c3);
 
 dealStudStreet: function() {
 var players = playersInHand();
+var key = ST.currentGameKey;
 for (var i = 0; i < players.length; i++) {
 var p = players[i];
-var faceDown = (p.holeCards.length === 6); // 7th street is down
+// In 7-card stud variants, the 7th (final) card is dealt face down. 5-card stud has no such down card.
+var faceDown = (key !== ‘stud5’) && (p.holeCards.length === 6);
 var c = HS.deck.pop();
 c.hidden = faceDown;
 p.holeCards.push(c);
@@ -1719,24 +1896,31 @@ if (player.chips === 0) player.allIn = true;
 },
 
 setupStudBringIn: function() {
-// lowest up-card brings in (aces high for bring-in purposes is standard low-card-brings-in rule; use suit rank alphabetical for tie: clubs,diamonds,hearts,spades)
+// Bring-in is decided by the visible up-card. Regular stud/Chicago/Baseball/5-card-stud: LOWEST up-card brings in.
+// Razz: HIGHEST up-card brings in (since low hands win, showing a high card is ‘worst’).
+var key = ST.currentGameKey;
+var upCardIdx = (key === ‘stud5’) ? 1 : 2; // 5-card stud’s up-card is the 2nd card dealt; 7-stud/razz/chicago/baseball show their 3rd card
 var players = playersInHand();
 var suitOrder = { c: 0, d: 1, h: 2, s: 3 };
-var lowest = null;
+var chosen = null;
+var wantHighest = (key === ‘razz’);
 for (var i = 0; i < players.length; i++) {
-var up = players[i].holeCards[2];
-var v = up.val === 14 ? 14 : up.val; // ace is high card in stud (not used for bring-in low)
-if (!lowest) { lowest = players[i]; continue; }
-var lowUp = lowest.holeCards[2];
-if (up.val < lowUp.val || (up.val === lowUp.val && suitOrder[up.suit] < suitOrder[lowUp.suit])) {
-lowest = players[i];
+var up = players[i].holeCards[upCardIdx];
+if (!chosen) { chosen = players[i]; continue; }
+var chosenUp = chosen.holeCards[upCardIdx];
+var better;
+if (wantHighest) {
+better = (up.val > chosenUp.val) || (up.val === chosenUp.val && suitOrder[up.suit] > suitOrder[chosenUp.suit]);
+} else {
+better = (up.val < chosenUp.val) || (up.val === chosenUp.val && suitOrder[up.suit] < suitOrder[chosenUp.suit]);
 }
+if (better) chosen = players[i];
 }
-var bringInAmt = Math.min(Math.floor(ST.bigBlind / 4) || 5, lowest.chips);
-Game.postBet(lowest, bringInAmt);
+var bringInAmt = Math.min(Math.floor(ST.bigBlind / 4) || 5, chosen.chips);
+Game.postBet(chosen, bringInAmt);
 HS.currentBet = bringInAmt;
 HS.minRaise = ST.bigBlind;
-var idx = ST.players.indexOf(lowest);
+var idx = ST.players.indexOf(chosen);
 HS.actingIndex = nextActiveIndex(idx);
 HS.lastAggressorIndex = idx;
 HS.streetName = ‘3rd Street’;
@@ -1871,15 +2055,37 @@ for (var i = 0; i < players.length; i++) players[i].bet = 0;
 HS.playersActedThisStreet = {};
 
 ```
-if (key === 'holdem') {
+if (key === 'holdem' || key === 'omaha' || key === 'omahahilo') {
   Game.advanceHoldemStreet();
 } else if (key === 'drawfive') {
   Game.advanceDrawStreet();
-} else if (key === 'stud7' || key === 'ftq') {
+} else if (key === 'stud7' || key === 'ftq' || key === 'razz' || key === 'chicago' || key === 'baseball') {
   Game.advanceStudStreet();
+} else if (key === 'stud5') {
+  Game.advanceStud5Street();
+} else if (key === 'indian') {
+  Game.doShowdown();
 }
 ```
 
+},
+
+advanceStud5Street: function() {
+// Five-Card Stud deals 2 cards up front (1 down, 1 up, labeled ‘3rd Street’ for UI consistency with
+// other stud games), then one more card per street until every player has 5 cards, then showdown.
+var players = playersInHand();
+var cardCount = players.length > 0 ? players[0].holeCards.length : 5;
+if (cardCount >= 5) {
+Game.doShowdown();
+return;
+}
+var streetNames = { 2: ‘4th Street’, 3: ‘5th Street’, 4: ‘Final Street’ };
+Game.dealStudStreet();
+HS.currentBet = 0;
+HS.minRaise = ST.bigBlind;
+HS.actingIndex = Game.studAfterCardActionStarter();
+HS.streetName = streetNames[cardCount] || ‘Final Street’;
+Game.setupBettingRound(HS.streetName);
 },
 
 advanceHoldemStreet: function() {
@@ -2017,10 +2223,42 @@ if (key === ‘holdem’) {
 cards = cards.concat(HS.community);
 return bestHandHigh(cards);
 }
+if (key === ‘omaha’ || key === ‘omahahilo’) {
+return bestHandOmaha(cards, HS.community);
+}
+if (key === ‘razz’) {
+var lowEv = bestLowHand(cards, false);
+return lowEvToComparable(lowEv);
+}
 if (HS.wildCard) {
 cards = applyWildcards(cards, HS.wildCard);
 }
 return bestHandHigh(cards);
+},
+
+// For Omaha Hi-Lo: best qualifying (8-or-better) low using exactly 2 hole + 3 board cards. Null if none qualifies.
+getPlayerOmahaLow: function(p) {
+var holeCombos = combinations(p.holeCards, 2);
+var boardCombos = combinations(HS.community, 3);
+var best = null;
+for (var i = 0; i < holeCombos.length; i++) {
+for (var j = 0; j < boardCombos.length; j++) {
+var five = holeCombos[i].concat(boardCombos[j]);
+var ev = bestLowHand(five, true);
+if (ev && (!best || compareLow(ev, best) < 0)) best = ev;
+}
+}
+return best;
+},
+
+// For Chicago: highest spade in the hole (down) cards only. Null if player has no spade in the hole.
+getPlayerHighSpade: function(p) {
+var best = null;
+for (var i = 0; i < p.holeCards.length; i++) {
+var c = p.holeCards[i];
+if (c.suit === ‘s’ && (!best || c.val > best.val)) best = c;
+}
+return best;
 },
 
 doShowdown: function() {
@@ -2034,15 +2272,122 @@ results.push({ player: players[i], ev: ev });
 results.sort(function(a, b) { return compareEval(a.ev, b.ev); });
 
 ```
-// handle side pots simply: split ST.pot proportional to all-in caps
-var payouts = Game.distributePot(results);
+var key = ST.currentGameKey;
+var payouts;
+if (key === 'omahahilo') {
+  var lowResults = [];
+  for (i = 0; i < players.length; i++) {
+    var lowEv = Game.getPlayerOmahaLow(players[i]);
+    if (lowEv) lowResults.push({ player: players[i], ev: lowEv });
+  }
+  lowResults.sort(function(a, b) { return compareLow(a.ev, b.ev); });
+  payouts = Game.distributeSplitPot(results, lowResults, 'low');
+} else if (key === 'chicago') {
+  var spadeResults = [];
+  for (i = 0; i < players.length; i++) {
+    var sp = Game.getPlayerHighSpade(players[i]);
+    if (sp) spadeResults.push({ player: players[i], spadeVal: sp.val });
+  }
+  spadeResults.sort(function(a, b) { return b.spadeVal - a.spadeVal; });
+  payouts = Game.distributeSplitPot(results, spadeResults, 'spade');
+} else {
+  payouts = Game.distributePot(results);
+}
 Table.showShowdownResult(payouts, results);
 ```
 
 },
 
-distributePot: function(results) {
-// Simplified pot distribution: supports all-in side pots via totalHandBet caps
+// Splits the pot in half between a high-hand winner group and a second-criterion winner group (low hand, or high spade).
+// If the second group is empty (no qualifying low / no spade in any hole), the high side takes the entire pot.
+distributeSplitPot: function(highResults, secondResults, mode) {
+var fullPot = HS.pot;
+if (secondResults.length === 0) {
+return Game.distributePot(highResults);
+}
+// High half gets the pot’s odd chip if any (standard convention). We compute the low/spade half’s
+// exact chip amount first (floor of half), then give the high half everything else via scale=1
+// minus what the second half actually takes - this keeps side-pot eligibility caps correct on the
+// high side while still guaranteeing exact conservation of the full pot.
+var secondHalfAmt = Math.floor(fullPot / 2);
+
+```
+var secondPayouts;
+if (mode === 'low') {
+  secondPayouts = Game.distributePotFlat(secondResults, secondHalfAmt, function(r){ return r.ev; }, compareLow, function(ev){ return lowHandName(ev); });
+} else {
+  secondPayouts = Game.distributePotFlat(secondResults, secondHalfAmt, function(r){ return r.spadeVal; },
+    function(a,b){ return b - a; },
+    function(v){ var rankNames = {11:'J',12:'Q',13:'K',14:'A'}; return 'High spade (' + (rankNames[v] || v) + ')'; });
+}
+var secondPaidTotal = 0;
+for (var i = 0; i < secondPayouts.length; i++) secondPaidTotal += secondPayouts[i].amount;
+
+var highShareAmt = fullPot - secondPaidTotal; // high half gets the remainder, including any odd chip
+var highScale = fullPot > 0 ? (highShareAmt / fullPot) : 0;
+var highPayouts = Game.distributePot(highResults, highScale);
+
+// merge payouts by player id
+var merged = {};
+for (i = 0; i < highPayouts.length; i++) {
+  var pid = highPayouts[i].player.id;
+  merged[pid] = merged[pid] || { player: highPayouts[i].player, amount: 0, handName: highPayouts[i].handName };
+  merged[pid].amount += highPayouts[i].amount;
+}
+for (i = 0; i < secondPayouts.length; i++) {
+  var pid2 = secondPayouts[i].player.id;
+  merged[pid2] = merged[pid2] || { player: secondPayouts[i].player, amount: 0, handName: secondPayouts[i].handName };
+  merged[pid2].amount += secondPayouts[i].amount;
+  merged[pid2].handName = merged[pid2].handName + (merged[pid2].handName ? ' + ' : '') + secondPayouts[i].handName;
+}
+var out = [];
+for (var k in merged) out.push(merged[k]);
+
+// Reconcile any last-chip rounding loss from scaled side-pot layer truncation (Math.floor per layer
+// can lose a chip or two versus the exact fullPot when there are multiple all-in side-pot layers).
+// Award/deduct the small remainder to whichever payout is currently largest, so the pot always
+// conserves exactly regardless of how many side-pot layers were involved.
+var paidSoFar = 0;
+for (i = 0; i < out.length; i++) paidSoFar += out[i].amount;
+var diff = fullPot - paidSoFar;
+if (diff !== 0 && out.length > 0) {
+  var biggestIdx = 0;
+  for (i = 1; i < out.length; i++) if (out[i].amount > out[biggestIdx].amount) biggestIdx = i;
+  out[biggestIdx].amount += diff;
+  out[biggestIdx].player.chips += diff;
+}
+return out;
+```
+
+},
+
+// Generic flat (non-side-pot) distribution of a fixed chip amount among tied winners, used for the
+// low half of hi-lo games and the high-spade half of Chicago (these don’t need side-pot layering
+// since every player who reached showdown is automatically eligible for these secondary awards).
+distributePotFlat: function(entries, amount, getKey, compareFn, nameFn) {
+if (entries.length === 0 || amount <= 0) return [];
+var bestKey = getKey(entries[0]);
+var winners = [];
+for (var i = 0; i < entries.length; i++) {
+if (compareFn(getKey(entries[i]), bestKey) === 0) winners.push(entries[i].player);
+}
+var share = Math.floor(amount / winners.length);
+var remainder = amount - share * winners.length;
+var payouts = [];
+for (i = 0; i < winners.length; i++) {
+var amt = share + (i === 0 ? remainder : 0);
+winners[i].chips += amt;
+payouts.push({ player: winners[i], amount: amt, handName: nameFn(bestKey) });
+}
+return payouts;
+},
+
+distributePot: function(results, potOverride) {
+// Simplified pot distribution: supports all-in side pots via totalHandBet caps.
+// potOverride, when given (0-1), scales every payout layer by that fraction of each
+// contributor’s stake - used for splitting a pot in half between high/low or high/spade winners
+// while still respecting all-in side-pot eligibility caps correctly.
+var scale = (typeof potOverride === ‘number’) ? potOverride : 1;
 var contributions = [];
 for (var i = 0; i < ST.players.length; i++) {
 var p = ST.players[i];
@@ -2050,7 +2395,6 @@ if (p.totalHandBet > 0) contributions.push({ id: p.id, amt: p.totalHandBet });
 }
 var remainingResults = results.slice(); // sorted best first, only non-folded
 var payouts = [];
-var pot = HS.pot;
 var caps = [];
 for (i = 0; i < contributions.length; i++) caps.push(contributions[i].amt);
 caps.sort(function(a, b) { return a - b; });
@@ -2067,6 +2411,7 @@ for (i = 0; i < uniqueCaps.length; i++) {
     var contrib = contributions[j];
     layerAmt += Math.max(0, Math.min(contrib.amt, cap) - prevCap);
   }
+  layerAmt = Math.floor(layerAmt * scale);
   if (layerAmt > 0) {
     // eligible winners: non-folded players whose totalHandBet >= cap
     var eligible = [];
