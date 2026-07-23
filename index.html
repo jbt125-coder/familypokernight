@@ -867,8 +867,8 @@ display: none;
   <div id="drawOverlay">
     <div id="drawMsg">Tap cards to discard, then draw</div>
     <div class="actionRow">
-      <button class="actBtn call" onclick="Game.confirmDraw()">Draw Selected</button>
-      <button class="actBtn check" onclick="Game.standPat()">Stand Pat</button>
+      <button class="actBtn call" id="drawBtn1">Draw Selected</button>
+      <button class="actBtn check" id="drawBtn2">Stand Pat</button>
     </div>
   </div>
 
@@ -1080,6 +1080,24 @@ var ev = evalFive(combos[i]);
 if (!best || compareEval(ev, best) < 0) best = ev;
 }
 return best;
+}
+
+// Guts uses 3-card hands. Ranking follows standard 3-card poker convention, where a Straight
+// outranks a Flush (the reverse of 5-card poker) since flushes are far more common with only 3 cards.
+function evalThree(cards) {
+var vals = [cards[0].val, cards[1].val, cards[2].val].sort(function(a, b) { return b - a; });
+var isFlush = (cards[0].suit === cards[1].suit && cards[1].suit === cards[2].suit);
+var isTrips = (vals[0] === vals[1] && vals[1] === vals[2]);
+var isWheel = (vals[0] === 14 && vals[1] === 3 && vals[2] === 2);
+var isStraight = (vals[0] - vals[1] === 1 && vals[1] - vals[2] === 1) || isWheel;
+var straightHigh = isWheel ? 3 : vals[0];
+if (isStraight && isFlush) return { rank: 5, tiebreak: [straightHigh], name: 'Straight Flush' };
+if (isTrips) return { rank: 4, tiebreak: [vals[0]], name: 'Three of a Kind' };
+if (isStraight) return { rank: 3, tiebreak: [straightHigh], name: straightHigh + '-high Straight' };
+if (isFlush) return { rank: 2, tiebreak: vals, name: 'Flush' };
+if (vals[0] === vals[1]) return { rank: 1, tiebreak: [vals[0], vals[2]], name: 'Pair' };
+if (vals[1] === vals[2]) return { rank: 1, tiebreak: [vals[1], vals[0]], name: 'Pair' };
+return { rank: 0, tiebreak: vals, name: vals[0] + '-high' };
 }
 
 function bestHandOmaha(hole, board) {
@@ -1425,7 +1443,8 @@ smallBlind: 10,
 bigBlind: 20,
 dealerIndex: 0,
 gameQueueIndex: 0,
-currentGameKey: 'holdem'
+currentGameKey: 'holdem',
+gutsCarryPot: 0
 };
 
 var BLIND_STEPS = [10, 15, 25, 50, 75, 100, 150, 250, 400, 600, 1000, 1500, 2500];
@@ -1538,6 +1557,7 @@ ST.smallBlind = BLIND_STEPS[0];
 ST.bigBlind = BLIND_STEPS[0] * 2;
 ST.dealerIndex = 0;
 ST.currentGameKey = 'holdem';
+ST.gutsCarryPot = 0;
 Nav.go('tableScreen');
 Game.startNewHand();
 },
@@ -1550,6 +1570,7 @@ ST.handsSinceBlindUp = 0;
 ST.blindLevel = 0;
 ST.smallBlind = BLIND_STEPS[0];
 ST.bigBlind = BLIND_STEPS[0] * 2;
+ST.gutsCarryPot = 0;
 ST.dealerIndex = 0;
 ST.gameQueueIndex = 0;
 
@@ -1637,6 +1658,11 @@ var p = ST.players[idx];
 if (!p.eliminated && !p.folded && !p.allIn) return idx;
 }
 return -1;
+}
+
+function findPlayerById(pid) {
+for (var i = 0; i < ST.players.length; i++) if (ST.players[i].id === pid) return ST.players[i];
+return null;
 }
 
 function countNonFolded() {
@@ -1762,6 +1788,8 @@ if (key === 'holdem' || key === 'omaha' || key === 'omahahilo') {
   return;
 } else if (key === 'guts') {
   Game.dealDrawCards(3);
+  HS.pot = ST.gutsCarryPot;
+  ST.gutsCarryPot = 0;
   HS.stage = 'gutsDecision';
   Game.startGutsDecision();
   return;
@@ -2044,7 +2072,7 @@ if (key === 'holdem' || key === 'omaha' || key === 'omahahilo') {
   Game.advanceStudStreet();
 } else if (key === 'stud5') {
   Game.advanceStud5Street();
-} else if (key === 'indian') {
+} else if (key === 'indian' || key === 'anaconda') {
   Game.doShowdown();
 }
 
@@ -2146,7 +2174,7 @@ HS.minRaise = ST.bigBlind;
 HS.actingIndex = nextActiveIndex(ST.dealerIndex);
 HS.streetName = 'postdraw';
 Game.setupBettingRound('postdraw');
-Table.hideDrawOverlay();
+Table.hideDecisionOverlay();
 Table.renderAll();
 return;
 }
@@ -2210,6 +2238,9 @@ if (key === 'razz') {
 var lowEv = bestLowHand(cards, false);
 return lowEvToComparable(lowEv);
 }
+if (key === 'indian') {
+return { rank: 0, tiebreak: [cards[0].val], name: cards[0].rank + ' high' };
+}
 if (HS.wildCard) {
 cards = applyWildcards(cards, HS.wildCard);
 }
@@ -2244,6 +2275,11 @@ return best;
 doShowdown: function() {
 HS.stage = 'showdown';
 var players = playersInHand();
+// stud games deal some hole cards face down; all cards turn face up for everyone at showdown
+for (var p = 0; p < players.length; p++) {
+for (var c = 0; c < players[p].holeCards.length; c++) players[p].holeCards[c].hidden = false;
+}
+Table.renderAll();
 var results = [];
 for (var i = 0; i < players.length; i++) {
 var ev = Game.getPlayerBestHand(players[i]);
@@ -2427,6 +2463,264 @@ Table.hideShowdown();
 setTimeout(function() {
 Game.startNewHand();
 }, 350);
+},
+
+// ––––– ANACONDA (PASS THE TRASH) –––––
+startAnacondaPass: function() {
+HS.passSchedule = [3, 2, 1];
+HS.passRound = 0;
+Game.startPassRound();
+},
+
+startPassRound: function() {
+var players = playersInHand();
+HS.passQueue = [];
+for (var i = 0; i < players.length; i++) HS.passQueue.push(players[i].id);
+HS.passSelections = {};
+Game.processNextPass();
+},
+
+processNextPass: function() {
+if (HS.passQueue.length === 0) {
+Game.applyPassRound();
+return;
+}
+var p = findPlayerById(HS.passQueue.shift());
+var needed = HS.passSchedule[HS.passRound];
+if (p.isHuman) {
+Table.showPassOverlay(p, needed);
+} else {
+setTimeout(function() {
+Bot.choosePassCards(p, needed);
+Game.processNextPass();
+}, 500);
+}
+},
+
+registerPassSelection: function(p, cards) {
+HS.passSelections[p.id] = cards;
+},
+
+confirmPass: function() {
+var p = ST.players[0];
+var sel = p.discardSelection || [];
+var needed = HS.passSchedule[HS.passRound];
+if (sel.length !== needed) {
+toast('Choose exactly ' + needed + ' card' + (needed === 1 ? '' : 's') + '.', 1400);
+return;
+}
+var cards = [];
+for (var i = 0; i < sel.length; i++) cards.push(p.holeCards[sel[i]]);
+Game.registerPassSelection(p, cards);
+p.discardSelection = [];
+Table.hideDecisionOverlay();
+Game.processNextPass();
+},
+
+applyPassRound: function() {
+var players = playersInHand();
+var incoming = {};
+for (var i = 0; i < players.length; i++) {
+var p = players[i];
+var passed = HS.passSelections[p.id];
+var kept = [];
+for (var j = 0; j < p.holeCards.length; j++) {
+if (passed.indexOf(p.holeCards[j]) === -1) kept.push(p.holeCards[j]);
+}
+p.holeCards = kept;
+var targetId = ST.players[nextActiveIndex(ST.players.indexOf(p))].id;
+incoming[targetId] = (incoming[targetId] || []).concat(passed);
+}
+for (i = 0; i < players.length; i++) {
+if (incoming[players[i].id]) players[i].holeCards = players[i].holeCards.concat(incoming[players[i].id]);
+}
+Table.renderAll();
+
+HS.passRound++;
+if (HS.passRound < HS.passSchedule.length) {
+Game.startPassRound();
+} else {
+HS.currentBet = 0;
+HS.minRaise = ST.bigBlind;
+HS.actingIndex = nextActiveIndex(ST.dealerIndex);
+Game.setupBettingRound('anaconda betting');
+}
+},
+
+// ––––– GUTS –––––
+startGutsDecision: function() {
+var players = playersInHand();
+HS.gutsQueue = [];
+for (var i = 0; i < players.length; i++) HS.gutsQueue.push(players[i].id);
+HS.gutsChoices = {};
+Game.processNextGutsDecision();
+},
+
+processNextGutsDecision: function() {
+if (HS.gutsQueue.length === 0) {
+Game.resolveGuts();
+return;
+}
+var p = findPlayerById(HS.gutsQueue.shift());
+if (p.isHuman) {
+Table.showGutsOverlay(p);
+} else {
+setTimeout(function() {
+HS.gutsChoices[p.id] = Bot.decideGutsIn(p);
+Game.processNextGutsDecision();
+}, 500);
+}
+},
+
+chooseGuts: function(isIn) {
+var p = ST.players[0];
+HS.gutsChoices[p.id] = isIn;
+Table.hideDecisionOverlay();
+Game.processNextGutsDecision();
+},
+
+resolveGuts: function() {
+var players = playersInHand();
+var inPlayers = [];
+for (var i = 0; i < players.length; i++) {
+if (HS.gutsChoices[players[i].id]) inPlayers.push(players[i]);
+}
+var ante = ST.bigBlind;
+for (i = 0; i < inPlayers.length; i++) {
+var amt = Math.min(ante, inPlayers[i].chips);
+inPlayers[i].chips -= amt;
+HS.pot += amt;
+}
+Table.renderAll();
+
+if (inPlayers.length < 2) {
+ST.gutsCarryPot = HS.pot;
+toast(inPlayers.length === 0 ? 'Nobody’s in — pot carries to the next hand.' : (inPlayers[0].name + ' is the only one in — pot carries to the next hand.'), 2200);
+HS.stage = 'done';
+setTimeout(function() { Game.proceedToNextHand(); }, 1800);
+return;
+}
+
+var results = [];
+for (i = 0; i < inPlayers.length; i++) {
+results.push({ player: inPlayers[i], ev: evalThree(inPlayers[i].holeCards) });
+}
+results.sort(function(a, b) { return compareEval(a.ev, b.ev); });
+var bestEv = results[0].ev;
+var winners = [];
+for (i = 0; i < results.length; i++) if (compareEval(results[i].ev, bestEv) === 0) winners.push(results[i]);
+
+var potNow = HS.pot;
+var share = Math.floor(potNow / winners.length);
+var remainder = potNow - share * winners.length;
+var payouts = [];
+for (i = 0; i < winners.length; i++) {
+var amt = share + (i === 0 ? remainder : 0);
+winners[i].player.chips += amt;
+payouts.push({ player: winners[i].player, amount: amt, handName: winners[i].ev.name });
+}
+
+var winnerIds = {};
+for (i = 0; i < winners.length; i++) winnerIds[winners[i].player.id] = true;
+var nextPot = 0;
+for (i = 0; i < inPlayers.length; i++) {
+if (winnerIds[inPlayers[i].id]) continue;
+var matchAmt = Math.min(potNow, inPlayers[i].chips);
+inPlayers[i].chips -= matchAmt;
+nextPot += matchAmt;
+}
+ST.gutsCarryPot = nextPot;
+
+HS.stage = 'showdown';
+Table.renderAll();
+Table.showShowdownResult(payouts, results);
+},
+
+// ––––– SCREW YOUR NEIGHBOR –––––
+startScrewSwapPhase: function() {
+var players = playersInHand();
+var ante = ST.bigBlind;
+for (var i = 0; i < players.length; i++) {
+var amt = Math.min(ante, players[i].chips);
+players[i].chips -= amt;
+players[i].totalHandBet += amt;
+HS.pot += amt;
+}
+HS.swapTurnsLeft = players.length;
+Table.renderAll();
+Game.processSwapTurn();
+},
+
+processSwapTurn: function() {
+Table.renderAll();
+if (HS.swapTurnsLeft <= 0) {
+Game.resolveScrewNeighbor();
+return;
+}
+var p = ST.players[HS.actingIndex];
+var isDealerTurn = (HS.actingIndex === ST.dealerIndex);
+if (p.isHuman) {
+Table.showSwapOverlay(p, isDealerTurn);
+} else {
+setTimeout(function() {
+Bot.decideSwap(p, isDealerTurn);
+Game.advanceSwapTurn();
+}, 600);
+}
+},
+
+// The dealer has no "next" player left to trade with on the final turn of the round, so as a common
+// house-rule variant, their "swap" draws a fresh card from the deck instead of trading with a neighbor.
+performSwap: function(p, isDealerTurn) {
+if (isDealerTurn) {
+p.holeCards[0] = HS.deck.pop();
+} else {
+var target = ST.players[nextActiveIndex(ST.players.indexOf(p))];
+var tmp = p.holeCards[0];
+p.holeCards[0] = target.holeCards[0];
+target.holeCards[0] = tmp;
+}
+},
+
+humanSwapChoice: function(doSwap) {
+var p = ST.players[HS.actingIndex];
+var isDealerTurn = (HS.actingIndex === ST.dealerIndex);
+if (doSwap) Game.performSwap(p, isDealerTurn);
+Table.hideDecisionOverlay();
+Game.advanceSwapTurn();
+},
+
+advanceSwapTurn: function() {
+HS.actingIndex = nextActiveIndex(HS.actingIndex);
+HS.swapTurnsLeft--;
+Game.processSwapTurn();
+},
+
+resolveScrewNeighbor: function() {
+HS.stage = 'showdown';
+var players = playersInHand();
+var results = [];
+for (var i = 0; i < players.length; i++) {
+var c = players[i].holeCards[0];
+results.push({ player: players[i], ev: { rank: 0, tiebreak: [c.val], name: c.rank + ' high' } });
+}
+results.sort(function(a, b) { return compareEval(a.ev, b.ev); });
+var lowestVal = results[results.length - 1].ev.tiebreak[0];
+var winners = [];
+for (i = 0; i < players.length; i++) if (players[i].holeCards[0].val !== lowestVal) winners.push(players[i]);
+if (winners.length === 0) winners = players.slice(); // everyone tied for lowest - just refund evenly
+
+var pot = HS.pot;
+var share = Math.floor(pot / winners.length);
+var remainder = pot - share * winners.length;
+var payouts = [];
+for (i = 0; i < winners.length; i++) {
+var amt = share + (i === 0 ? remainder : 0);
+winners[i].chips += amt;
+payouts.push({ player: winners[i], amount: amt, handName: 'Not lowest card' });
+}
+Table.renderAll();
+Table.showShowdownResult(payouts, results);
 }
 };
 
@@ -2578,6 +2872,38 @@ if (!keep) discardIdxs.push(i);
 // never discard more than 4 unless truly nothing (stand pat safety not needed here)
 if (discardIdxs.length > 4) discardIdxs = discardIdxs.slice(0, 4);
 Game.performDraw(p, discardIdxs);
+},
+
+// Anaconda: pass away the lowest-value cards that aren't part of a pair-or-better, keeping the rest.
+choosePassCards: function(p, needed) {
+var counts = {};
+for (var i = 0; i < p.holeCards.length; i++) counts[p.holeCards[i].val] = (counts[p.holeCards[i].val] || 0) + 1;
+var idxs = [];
+for (i = 0; i < p.holeCards.length; i++) idxs.push(i);
+idxs.sort(function(a, b) {
+var ca = p.holeCards[a], cb = p.holeCards[b];
+var pa = counts[ca.val] >= 2 ? 1 : 0;
+var pb = counts[cb.val] >= 2 ? 1 : 0;
+if (pa !== pb) return pa - pb;
+return ca.val - cb.val;
+});
+var passIdxs = idxs.slice(0, needed);
+var cards = [];
+for (i = 0; i < passIdxs.length; i++) cards.push(p.holeCards[passIdxs[i]]);
+Game.registerPassSelection(p, cards);
+},
+
+// Guts: go IN on a strong 3-card hand (pair-or-better, or a high card), with a little randomness.
+decideGutsIn: function(p) {
+var ev = evalThree(p.holeCards);
+var strength = ev.rank / 5 + ((ev.tiebreak[0] || 0) / 14) * 0.2;
+var threshold = 0.3 + Math.random() * 0.25;
+return strength > threshold;
+},
+
+// Screw Your Neighbor: keep a strong card (10 or better), otherwise take the swap/redraw.
+decideSwap: function(p, isDealerTurn) {
+if (p.holeCards[0].val < 10) Game.performSwap(p, isDealerTurn);
 }
 };
 
@@ -2685,7 +3011,7 @@ var p = ST.players[i];
 var pos = positions[i];
 if (p.eliminated) continue;
 var avatarCls = 'seatAvatar';
-if (i === HS.actingIndex && HS.stage === 'betting') avatarCls += ' active';
+if (i === HS.actingIndex && (HS.stage === 'betting' || HS.stage === 'swap')) avatarCls += ' active';
 if (p.folded) avatarCls += ' folded';
 var isDealer = (i === ST.dealerIndex);
 var cardsHtml = '';
@@ -2694,7 +3020,8 @@ cardsHtml = ''; // human cards shown big in handArea
 } else {
 for (var c = 0; c < p.holeCards.length; c++) {
 var card = p.holeCards[c];
-if (ST.currentGameKey === 'holdem' || ST.currentGameKey === 'drawfive') {
+if (ST.currentGameKey === 'holdem' || ST.currentGameKey === 'drawfive' || ST.currentGameKey === 'omaha' || ST.currentGameKey === 'omahahilo' ||
+ST.currentGameKey === 'anaconda' || ST.currentGameKey === 'guts' || ST.currentGameKey === 'screwneighbor') {
 cardsHtml += miniCardHtml(HS.stage === 'showdown' && !p.folded ? card : { hidden: true });
 } else {
 cardsHtml += miniCardHtml(card.hidden ? { hidden: true } : card);
@@ -2718,13 +3045,17 @@ layer.innerHTML = html;
 renderHumanHand: function() {
 var p = ST.players[0];
 var html = '';
-var showSelectable = (HS.stage === 'draw' && document.getElementById('drawOverlay').className.indexOf('show') >= 0);
+var showSelectable = ((HS.stage === 'draw' || HS.stage === 'pass') && document.getElementById('drawOverlay').className.indexOf('show') >= 0);
+// Indian Poker: you hold your own card facing outward, so it's hidden from YOU (not opponents) until showdown.
+// This is the only game where the 'hidden' flag (which everywhere else means "hidden from opponents") applies to the owner.
+var forceHiddenFromSelf = (ST.currentGameKey === 'indian' && HS.stage !== 'showdown');
 for (var i = 0; i < p.holeCards.length; i++) {
 var card = p.holeCards[i];
 var selected = p.discardSelection && p.discardSelection.indexOf(i) >= 0;
 var extra = selected ? ' style="opacity:0.4; -webkit-transform: translateY(-10px); transform: translateY(-10px);"' : '';
 var clickAttr = showSelectable ? ' onclick="Table.toggleDiscard(' + i + ')"' : '';
-html += '<div' + clickAttr + extra + '>' + cardHtml(card.hidden ? { hidden: true } : card) + '</div>';
+var displayCard = forceHiddenFromSelf ? { hidden: true } : { rank: card.rank, suit: card.suit, val: card.val, hidden: false };
+html += '<div' + clickAttr + extra + '>' + cardHtml(displayCard) + '</div>';
 }
 document.getElementById('handArea').innerHTML = html;
 },
@@ -2739,15 +3070,66 @@ Table.renderHumanHand();
 },
 
 showDrawOverlay: function(p) {
-document.getElementById('drawOverlay').className = 'show';
-document.getElementById('actionBar').style.display = 'none';
 p.discardSelection = [];
+Table.showDecisionOverlay('Tap cards to discard, then draw', [
+{ label: 'Draw Selected', cls: 'call', action: function() { Game.confirmDraw(); } },
+{ label: 'Stand Pat', cls: 'check', action: function() { Game.standPat(); } }
+]);
 Table.renderHumanHand();
 },
 
-hideDrawOverlay: function() {
+// Generic two-button decision overlay, reused for the draw phase (Five-Card Draw) as well as
+// Anaconda's card-pass prompt, Guts' IN/OUT choice, and Screw Your Neighbor's swap/knock choice.
+// Pass a single-item buttons array to show just one button (e.g. Anaconda's mandatory pass).
+showDecisionOverlay: function(message, buttons) {
+document.getElementById('drawMsg').innerHTML = message;
+var btn1 = document.getElementById('drawBtn1');
+var btn2 = document.getElementById('drawBtn2');
+btn1.innerHTML = buttons[0].label;
+btn1.className = 'actBtn ' + (buttons[0].cls || 'call');
+btn1.onclick = buttons[0].action;
+if (buttons[1]) {
+btn2.style.display = '';
+btn2.innerHTML = buttons[1].label;
+btn2.className = 'actBtn ' + (buttons[1].cls || 'check');
+btn2.onclick = buttons[1].action;
+} else {
+btn2.style.display = 'none';
+}
+document.getElementById('drawOverlay').className = 'show';
+document.getElementById('actionBar').style.display = 'none';
+},
+
+hideDecisionOverlay: function() {
 document.getElementById('drawOverlay').className = '';
 document.getElementById('actionBar').style.display = 'block';
+document.getElementById('drawBtn2').style.display = '';
+},
+
+showPassOverlay: function(p, needed) {
+p.discardSelection = [];
+Table.showDecisionOverlay(
+'Choose exactly ' + needed + ' card' + (needed === 1 ? '' : 's') + ' to pass left',
+[{ label: 'Pass Selected', cls: 'call', action: function() { Game.confirmPass(); } }]
+);
+Table.renderHumanHand();
+},
+
+showGutsOverlay: function(p) {
+Table.showDecisionOverlay('Look at your cards — are you IN or OUT?', [
+{ label: 'IN', cls: 'bet', action: function() { Game.chooseGuts(true); } },
+{ label: 'OUT', cls: 'fold', action: function() { Game.chooseGuts(false); } }
+]);
+Table.renderHumanHand();
+},
+
+showSwapOverlay: function(p, isDealerTurn) {
+var msg = isDealerTurn ? 'Your turn — draw a new card, or keep yours?' : 'Your turn — swap cards with the next player, or knock to keep yours?';
+Table.showDecisionOverlay(msg, [
+{ label: isDealerTurn ? 'Draw New' : 'Swap', cls: 'bet', action: function() { Game.humanSwapChoice(true); } },
+{ label: isDealerTurn ? 'Keep' : 'Knock', cls: 'check', action: function() { Game.humanSwapChoice(false); } }
+]);
+Table.renderHumanHand();
 },
 
 enableHumanControls: function(p) {
