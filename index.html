@@ -2694,7 +2694,7 @@ cardsHtml = ''; // human cards shown big in handArea
 } else {
 for (var c = 0; c < p.holeCards.length; c++) {
 var card = p.holeCards[c];
-if (ST.currentGameKey === 'holdem' || ST.currentGameKey === 'drawfive') {
+if (ST.currentGameKey === 'holdem' || ST.currentGameKey === 'drawfive' || ST.currentGameKey === 'omaha' || ST.currentGameKey === 'omahahilo') {
 cardsHtml += miniCardHtml(HS.stage === 'showdown' && !p.folded ? card : { hidden: true });
 } else {
 cardsHtml += miniCardHtml(card.hidden ? { hidden: true } : card);
